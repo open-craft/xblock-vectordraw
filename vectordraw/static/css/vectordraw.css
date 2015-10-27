@@ -1,0 +1,9 @@
+/* CSS for VectorDrawXBlock */
+
+.vectordraw_block .count {
+    font-weight: bold;
+}
+
+.vectordraw_block p {
+    cursor: pointer;
+}
