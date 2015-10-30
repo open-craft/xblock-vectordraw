@@ -1,5 +1,13 @@
 <div class="vectordraw_block">
 
+  <h2>{{ self.display_name }}</h2>
+
+  {% if self.description %}
+    <div class="vectordraw-description">
+      {{ self.description|safe }}
+    </div>
+  {% endif %}
+
   <div id="vectordraw" />
 
 </div>

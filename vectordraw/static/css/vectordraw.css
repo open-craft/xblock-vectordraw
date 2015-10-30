@@ -4,6 +4,10 @@
     display: inline-block;
 }
 
+.vectordraw_block .vectordraw-description {
+    margin-bottom: 1.5em;
+}
+
 .vectordraw_block .jxgboard {
     float: left;
     border: 2px solid #1f628d;

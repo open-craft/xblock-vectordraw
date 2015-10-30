@@ -35,6 +35,15 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         scope=Scope.content
     )
 
+    description = String(
+        display_name="Description",
+        help="Exercise description displayed above vector drawing box",
+        default="",
+        multiline_editor="html",
+        resettable_editor=False,
+        scope=Scope.content
+    )
+
     width = Integer(
         display_name="Width",
         help="The width of the board in pixels",
@@ -172,6 +181,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
 
     editable_fields = (
         'display_name',
+        'description',
         'width',
         'height',
         'bounding_box_size',
@@ -217,6 +227,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         The primary view of the VectorDrawXBlock, shown to students
         when viewing courses.
         """
+        context['self'] = self
         fragment = Fragment()
         fragment.add_content(loader.render_template('static/html/vectordraw.html', context))
         fragment.add_css(self.resource_string('static/css/vectordraw.css'))
