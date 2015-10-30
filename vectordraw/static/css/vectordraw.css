@@ -1,10 +1,13 @@
 /* CSS for VectorDrawXBlock */
 
-.vectordraw_block {
+.vectordraw_block,
+.vectordraw_block #vectordraw {
     display: inline-block;
 }
 
-.vectordraw_block .vectordraw-description {
+.vectordraw_block .vectordraw-description,
+.vectordraw_block #vectordraw,
+.vectordraw_block .vectordraw-status {
     margin-bottom: 1.5em;
 }
 
@@ -85,4 +88,26 @@ vectordraw_block .menu .controls button.redo {
 
 .vectordraw_block .menu .vector-prop-slope {
     display: none;
+}
+
+.vectordraw_block .action button {
+    height: 40px;
+    margin-right: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.vectordraw_block .vectordraw-status {
+    display: inline-block;
+    width: 100%;
+}
+
+.vectordraw_block .checkmark-correct {
+    font-size: 22pt;
+    color: #629b2b;
+}
+
+.vectordraw_block .checkmark-incorrect {
+    font-size: 22pt;
+    color: #ff0000;
 }

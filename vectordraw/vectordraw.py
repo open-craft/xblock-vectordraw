@@ -1,16 +1,21 @@
 """TO-DO: Write a description of what this XBlock is."""
 
 import json
+import logging
 import pkg_resources
 
 from xblock.core import XBlock
-from xblock.fields import Scope, Boolean, Integer, String
+from xblock.fields import Scope, Boolean, Float, Integer, String
 from xblock.fragment import Fragment
 from xblockutils.resources import ResourceLoader
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 
+from .grader import Grader
+
 
 loader = ResourceLoader(__name__)
+
+log = logging.getLogger(__name__)
 
 
 class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
@@ -179,6 +184,13 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         scope=Scope.content
     )
 
+    weight = Float(
+        display_name="Weight",
+        default=1,
+        scope=Scope.settings,
+        enforce_type=True
+    )
+
     editable_fields = (
         'display_name',
         'description',
@@ -200,6 +212,8 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         'custom_checks'
     )
 
+    has_score = True
+
     @property
     def background(self):
         return {
@@ -216,6 +230,10 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
     def points_json(self):
         return json.loads(self.points)
 
+    @property
+    def expected_result_json(self):
+        return json.loads(self.expected_result)
+
     def resource_string(self, path):
         """Handy helper for getting resources from our kit."""
         data = pkg_resources.resource_string(__name__, path)
@@ -230,6 +248,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         context['self'] = self
         fragment = Fragment()
         fragment.add_content(loader.render_template('static/html/vectordraw.html', context))
+        fragment.add_css_url("//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css")
         fragment.add_css(self.resource_string('static/css/vectordraw.css'))
         fragment.add_javascript_url("//cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.98/jsxgraphcore.js")
         fragment.add_javascript(self.resource_string("static/js/src/vectordraw.js"))
@@ -248,6 +267,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
                 'background': self.background,
                 'vectors': self.vectors_json,
                 'points': self.points_json,
+                'expected_result': self.expected_result_json
             }
         )
         return fragment
@@ -255,15 +275,20 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
     # TO-DO: change this handler to perform your own actions.  You may need more
     # than one handler, or you may not need any handlers at all.
     @XBlock.json_handler
-    def increment_count(self, data, suffix=''):
+    def check_answers(self, data, suffix=''):
         """
-        An example handler, which increments the data.
+        Check student's answers
         """
-        # Just to show data coming in...
-        assert data['hello'] == 'world'
-
-        self.count += 1
-        return {"count": self.count}
+        grader = Grader()
+        result = grader.grade(data)
+        # Publish grade data
+        score = 1 if result["ok"] else 0
+        self.runtime.publish(self, 'grade', dict(value=score, max_value=1))
+        return {
+            "message": "Success!",
+            "data": data,
+            "result": result,
+        }
 
     # TO-DO: change this to create the scenarios you'd like to see in the
     # workbench while developing your XBlock.

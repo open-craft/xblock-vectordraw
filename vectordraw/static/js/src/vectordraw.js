@@ -545,11 +545,75 @@ function VectorDrawXBlock(runtime, element, init_args) {
         this.board.update();
     };
 
+    var checkHandlerUrl = runtime.handlerUrl(element, 'check_answers');
+
+    var checkXHR;
+
+    function getInput(vectordraw) {
+        var input = vectordraw.getState();
+
+        // Transform the expected_result setting into a list of checks.
+        var checks = [];
+
+        _.each(vectordraw.settings.expected_result, function(answer, name) {
+            var presence_check = {vector: name, check: 'presence'};
+            if ('presence_errmsg' in answer) {
+                presence_check.errmsg = answer.presence_errmsg;
+            }
+            checks.push(presence_check);
+
+            [
+                'tail', 'tail_x', 'tail_y', 'tip', 'tip_x', 'tip_y', 'coords',
+                'length', 'angle', 'segment_angle', 'segment_coords', 'points_on_line'
+            ].forEach(function(prop) {
+                if (prop in answer) {
+                    var check = {vector: name, check: prop, expected: answer[prop]};
+                    if (prop + '_tolerance' in answer) {
+                        check.tolerance = answer[prop + '_tolerance'];
+                    }
+                    if (prop + '_errmsg' in answer) {
+                        check.errmsg = answer[prop + '_errmsg'];
+                    }
+                    checks.push(check);
+                }
+            });
+        });
+
+        input.checks = checks.concat(vectordraw.settings.custom_checks);
+
+        return input;
+    }
+
+    function updateStatus(data) {
+        var correctness = $('.correctness', element);
+        if (data.result.ok) {
+            correctness.removeClass('checkmark-incorrect fa fa-times');
+            correctness.addClass('checkmark-correct fa fa-check');
+        } else {
+            correctness.removeClass('checkmark-correct fa fa-check');
+            correctness.addClass('checkmark-incorrect fa fa-times');
+        }
+        $('.status-message', element).text(data.result.msg);
+    }
+
+    function checkAnswers(vectordraw) {
+        if (checkXHR) {
+            checkXHR.abort();
+        }
+        var state = getInput(vectordraw);
+        checkXHR = $.post(checkHandlerUrl, JSON.stringify(state))
+            .success(function(response) {
+                console.log(JSON.stringify(response));
+                updateStatus(response);
+            });
+    }
 
     $(function ($) {
         /* Here's where you'd do things on page load. */
 
         var vectordraw = new VectorDraw('vectordraw', init_args);
+
+        $('.action .check', element).on('click', function(e) { checkAnswers(vectordraw); });
 
     });
 }
