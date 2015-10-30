@@ -1,4 +1,4 @@
-"""TO-DO: Write a description of what this XBlock is."""
+"""An XBlock that allows course authors to define vector drawing exercises."""
 
 import json
 import logging
@@ -20,17 +20,8 @@ log = logging.getLogger(__name__)
 
 class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
     """
-    TO-DO: document what your XBlock does.
+    An XBlock that allows course authors to define vector drawing exercises.
     """
-
-    # Fields are defined on the class.  You can access them in your code as
-    # self.<fieldname>.
-
-    # TO-DO: delete count, and define your own fields.
-    count = Integer(
-        default=0, scope=Scope.user_state,
-        help="A simple counter, to show something happening",
-    )
 
     # Content
     display_name = String(
@@ -268,7 +259,6 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         data = pkg_resources.resource_string(__name__, path)
         return data.decode("utf8")
 
-    # TO-DO: change this view to display your data your own way.
     def student_view(self, context=None):
         """
         The primary view of the VectorDrawXBlock, shown to students
@@ -284,12 +274,10 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         fragment.initialize_js('VectorDrawXBlock', {"settings": self.settings, "user_state": self.user_state})
         return fragment
 
-    # TO-DO: change this handler to perform your own actions.  You may need more
-    # than one handler, or you may not need any handlers at all.
     @XBlock.json_handler
-    def check_answers(self, data, suffix=''):
+    def check_answer(self, data, suffix=''):
         """
-        Check student's answers
+        Check and persist student's answer to this vector drawing problem.
         """
         # Save answer
         self.answer = dict(
@@ -305,8 +293,6 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         score = 1 if result["ok"] else 0
         self.runtime.publish(self, 'grade', dict(value=score, max_value=1))
         return {
-            "message": "Success!",
-            "data": data,
             "result": result,
         }
 

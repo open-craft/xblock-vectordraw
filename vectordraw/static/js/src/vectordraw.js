@@ -2,6 +2,8 @@
 function VectorDrawXBlock(runtime, element, init_args) {
     'use strict';
 
+    // Logic for rendering and interacting with vector drawing exercise
+
     var VectorDraw = function(element_id, settings) {
         this.board = null;
         this.dragged_vector = null;
@@ -545,7 +547,9 @@ function VectorDrawXBlock(runtime, element, init_args) {
         this.board.update();
     };
 
-    var checkHandlerUrl = runtime.handlerUrl(element, 'check_answers');
+    // Logic for checking answers
+
+    var checkHandlerUrl = runtime.handlerUrl(element, 'check_answer');
 
     var checkXHR;
 
@@ -585,40 +589,45 @@ function VectorDrawXBlock(runtime, element, init_args) {
     }
 
     function updateStatus(data) {
-        var correctness = $('.correctness', element);
+        var correctness = $('.correctness', element),
+            correctClass = 'checkmark-correct fa fa-check',
+            incorrectClass = 'checkmark-incorrect fa fa-times';
         if (data.result.ok) {
-            correctness.removeClass('checkmark-incorrect fa fa-times');
-            correctness.addClass('checkmark-correct fa fa-check');
+            correctness.removeClass(incorrectClass);
+            correctness.addClass(correctClass);
         } else {
-            correctness.removeClass('checkmark-correct fa fa-check');
-            correctness.addClass('checkmark-incorrect fa fa-times');
+            correctness.removeClass(correctClass);
+            correctness.addClass(incorrectClass);
         }
         $('.status-message', element).text(data.result.msg);
     }
 
-    function checkAnswers(vectordraw) {
+    function checkAnswer(vectordraw) {
         if (checkXHR) {
             checkXHR.abort();
         }
         var state = getInput(vectordraw);
         checkXHR = $.post(checkHandlerUrl, JSON.stringify(state))
             .success(function(response) {
-                console.log(JSON.stringify(response));
                 updateStatus(response);
             });
     }
 
-    $(function ($) {
-        /* Here's where you'd do things on page load. */
+    // Initialization logic
 
+    $(function ($) {
+
+        // Initialize exercise
         var vectordraw = new VectorDraw('vectordraw', init_args.settings);
 
+        // Load user state
         if (!_.isEmpty(init_args.user_state)) {
             vectordraw.setState(init_args.user_state);
             updateStatus(init_args.user_state);
         }
 
-        $('.action .check', element).on('click', function(e) { checkAnswers(vectordraw); });
+        // Set up click handlers
+        $('.action .check', element).on('click', function(e) { checkAnswer(vectordraw); });
 
     });
 }
