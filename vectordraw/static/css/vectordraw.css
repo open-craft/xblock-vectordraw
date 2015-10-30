@@ -1,9 +1,84 @@
 /* CSS for VectorDrawXBlock */
 
-.vectordraw_block .count {
+.vectordraw_block {
+    display: inline-block;
+}
+
+.vectordraw_block .jxgboard {
+    float: left;
+    border: 2px solid #1f628d;
+}
+
+.vectordraw_block .jxgboard .JXGtext {
+    pointer-events: none;  /* prevents cursor from turning into caret when over a label */
+}
+
+.vectordraw_block .menu {
+    float: left;
+    width: 160px;
+    margin-left: 15px;
+}
+
+.vectordraw_block .menu .controls {
+    margin-bottom: 20px;
+    font-size: 0;
+}
+
+.vectordraw_block .menu .controls select {
+    width: 160px;
+    margin-bottom: 8px;
+    font-size: 18px;
+}
+
+.vectordraw_block .menu .controls button {
+    display: inline-block;
+    background-color: #3498db;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px #666;
+    color: #fff;
+    font-size: 14px;
+    padding: 5px 10px 5px 10px;
+    margin: 4px 0;
+    border: 2px solid #1f628d;
+    text-decoration: none;
+    width: 160px;
+}
+
+.vectordraw_block .menu .controls button:hover {
+    background: #3cb0fd;
+    background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
+    background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
+    background-image: -ms-linear-gradient(top, #3cb0fd, #3498db);
+    background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
+    background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
+    text-decoration: none;
+}
+
+vectordraw_block .menu .controls button.undo,
+vectordraw_block .menu .controls button.redo {
+    width: 78px;
+}
+
+.vectordraw_block .menu .controls button.undo {
+    margin-right: 4px;
+}
+
+.vectordraw_block .menu .vector-properties {
+    padding: 10px;
+    border: 1px solid #1f628d;
+    font-size: 16px;
+    line-height: 1.25;
+}
+
+.vectordraw_block .menu .vector-properties h3 {
+    font-size: 16px;
+    margin: 0 0 5px;
+}
+
+.vectordraw_block .menu .vector-properties .vector-prop-bold {
     font-weight: bold;
 }
 
-.vectordraw_block p {
-    cursor: pointer;
+.vectordraw_block .menu .vector-prop-slope {
+    display: none;
 }
