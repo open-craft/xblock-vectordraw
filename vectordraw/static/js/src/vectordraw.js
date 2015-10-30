@@ -611,7 +611,12 @@ function VectorDrawXBlock(runtime, element, init_args) {
     $(function ($) {
         /* Here's where you'd do things on page load. */
 
-        var vectordraw = new VectorDraw('vectordraw', init_args);
+        var vectordraw = new VectorDraw('vectordraw', init_args.settings);
+
+        if (!_.isEmpty(init_args.user_state)) {
+            vectordraw.setState(init_args.user_state);
+            updateStatus(init_args.user_state);
+        }
 
         $('.action .check', element).on('click', function(e) { checkAnswers(vectordraw); });
 

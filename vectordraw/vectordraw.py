@@ -5,7 +5,7 @@ import logging
 import pkg_resources
 
 from xblock.core import XBlock
-from xblock.fields import Scope, Boolean, Float, Integer, String
+from xblock.fields import Scope, Boolean, Dict, Float, Integer, String
 from xblock.fragment import Fragment
 from xblockutils.resources import ResourceLoader
 from xblockutils.studio_editable import StudioEditableXBlockMixin
@@ -191,6 +191,10 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         enforce_type=True
     )
 
+    # User state
+    answer = Dict(scope=Scope.user_state)
+    result = Dict(scope=Scope.user_state)
+
     editable_fields = (
         'display_name',
         'description',
@@ -213,6 +217,31 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
     )
 
     has_score = True
+
+    @property
+    def settings(self):
+        return {
+            'width': self.width,
+            'height': self.height,
+            'bounding_box_size': self.bounding_box_size,
+            'axis': self.axis,
+            'show_navigation': self.show_navigation,
+            'show_vector_properties': self.show_vector_properties,
+            'show_slope_for_lines': self.show_slope_for_lines,
+            'add_vector_label': self.add_vector_label,
+            'vector_properties_label': self.vector_properties_label,
+            'background': self.background,
+            'vectors': self.vectors_json,
+            'points': self.points_json,
+            'expected_result': self.expected_result_json
+        }
+
+    @property
+    def user_state(self):
+        user_state = self.answer
+        if self.result:
+            user_state['result'] = self.result
+        return user_state
 
     @property
     def background(self):
@@ -252,24 +281,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         fragment.add_css(self.resource_string('static/css/vectordraw.css'))
         fragment.add_javascript_url("//cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.98/jsxgraphcore.js")
         fragment.add_javascript(self.resource_string("static/js/src/vectordraw.js"))
-        fragment.initialize_js(
-            'VectorDrawXBlock',
-            {
-                'width': self.width,
-                'height': self.height,
-                'bounding_box_size': self.bounding_box_size,
-                'axis': self.axis,
-                'show_navigation': self.show_navigation,
-                'show_vector_properties': self.show_vector_properties,
-                'show_slope_for_lines': self.show_slope_for_lines,
-                'add_vector_label': self.add_vector_label,
-                'vector_properties_label': self.vector_properties_label,
-                'background': self.background,
-                'vectors': self.vectors_json,
-                'points': self.points_json,
-                'expected_result': self.expected_result_json
-            }
-        )
+        fragment.initialize_js('VectorDrawXBlock', {"settings": self.settings, "user_state": self.user_state})
         return fragment
 
     # TO-DO: change this handler to perform your own actions.  You may need more
@@ -279,8 +291,16 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         """
         Check student's answers
         """
+        # Save answer
+        self.answer = dict(
+            vectors=data["vectors"],
+            points=data["points"]
+        )
+        # Compute result
         grader = Grader()
         result = grader.grade(data)
+        # Save result
+        self.result = result
         # Publish grade data
         score = 1 if result["ok"] else 0
         self.runtime.publish(self, 'grade', dict(value=score, max_value=1))
