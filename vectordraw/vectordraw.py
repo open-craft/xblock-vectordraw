@@ -13,9 +13,9 @@ from xblockutils.studio_editable import StudioEditableXBlockMixin
 from .grader import Grader
 
 
-loader = ResourceLoader(__name__)
+loader = ResourceLoader(__name__)  # pylint: disable=invalid-name
 
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
 class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
@@ -131,7 +131,8 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         display_name="Vectors",
         help=(
             "List of vectors to use for the exercise. "
-            "You must specify it as an array of entries where each entry represents an individual vector."
+            "You must specify it as an array of entries "
+            "where each entry represents an individual vector."
         ),
         default="[]",
         multiline_editor=True,
@@ -143,7 +144,8 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         display_name="Points",
         help=(
             "List of points to be drawn on the board for reference, or to be placed by the student."
-            "You must specify it as an array of entries where each entry represents an individual point."
+            "You must specify it as an array of entries "
+            "where each entry represents an individual point."
         ),
         default="[]",
         multiline_editor=True,
@@ -167,7 +169,8 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         display_name="Custom checks",
         help=(
             'List of custom checks to use for grading. '
-            'This is needed when grading is more complex and cannot be defined in terms of "Expected results" only.'
+            'This is needed when grading is more complex '
+            'and cannot be defined in terms of "Expected results" only.'
         ),
         default="[]",
         multiline_editor=True,
@@ -216,6 +219,9 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
 
     @property
     def settings(self):
+        """
+        Return settings for this exercise.
+        """
         return {
             'width': self.width,
             'height': self.height,
@@ -227,13 +233,16 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
             'add_vector_label': self.add_vector_label,
             'vector_properties_label': self.vector_properties_label,
             'background': self.background,
-            'vectors': self.vectors_json,
-            'points': self.points_json,
-            'expected_result': self.expected_result_json
+            'vectors': self.get_vectors,
+            'points': self.get_points,
+            'expected_result': self.get_expected_result
         }
 
     @property
     def user_state(self):
+        """
+        Return user state, which is a combination of most recent answer and result.
+        """
         user_state = self.answer
         if self.result:
             user_state['result'] = self.result
@@ -241,6 +250,9 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
 
     @property
     def background(self):
+        """
+        Return information about background to draw for this exercise.
+        """
         return {
             'src': self.background_url,
             'width': self.background_width,
@@ -248,15 +260,25 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         }
 
     @property
-    def vectors_json(self):
+    def get_vectors(self):
+        """
+        Load info about vectors for this exercise from JSON string specified by course author.
+        """
         return json.loads(self.vectors)
 
     @property
-    def points_json(self):
+    def get_points(self):
+        """
+        Load info about points for this exercise from JSON string specified by course author.
+        """
         return json.loads(self.points)
 
     @property
-    def expected_result_json(self):
+    def get_expected_result(self):
+        """
+        Load info about expected result for this exercise
+        from JSON string specified by course author.
+        """
         return json.loads(self.expected_result)
 
     def student_view(self, context=None):
@@ -267,14 +289,20 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         context['self'] = self
         fragment = Fragment()
         fragment.add_content(loader.render_template('static/html/vectordraw.html', context))
-        fragment.add_css_url("//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css")
+        fragment.add_css_url(
+            "//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css"
+        )
         fragment.add_css(loader.load_unicode('static/css/vectordraw.css'))
-        fragment.add_javascript_url("//cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.98/jsxgraphcore.js")
+        fragment.add_javascript_url(
+            "//cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.98/jsxgraphcore.js"
+        )
         fragment.add_javascript(loader.load_unicode("static/js/src/vectordraw.js"))
-        fragment.initialize_js('VectorDrawXBlock', {"settings": self.settings, "user_state": self.user_state})
+        fragment.initialize_js(
+            'VectorDrawXBlock', {"settings": self.settings, "user_state": self.user_state}
+        )
         return fragment
 
-    def is_valid(self, data):
+    def is_valid(self, data):  # pylint: disable=no-self-use
         """
         Validate answer data submitted by user.
         """
@@ -308,7 +336,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         return 'checks' in data
 
     @XBlock.json_handler
-    def check_answer(self, data, suffix=''):
+    def check_answer(self, data, suffix=''):  # pylint: disable=unused-argument
         """
         Check and persist student's answer to this vector drawing problem.
         """
