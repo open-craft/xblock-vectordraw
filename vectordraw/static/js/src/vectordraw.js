@@ -608,26 +608,21 @@ function VectorDrawXBlock(runtime, element, init_args) {
         }
         var state = getInput(vectordraw);
         checkXHR = $.post(checkHandlerUrl, JSON.stringify(state))
-            .success(function(response) {
-                updateStatus(response);
-            });
+            .success(updateStatus);
     }
 
     // Initialization logic
 
-    $(function ($) {
+    // Initialize exercise
+    var vectordraw = new VectorDraw('vectordraw', init_args.settings);
 
-        // Initialize exercise
-        var vectordraw = new VectorDraw('vectordraw', init_args.settings);
+    // Load user state
+    if (!_.isEmpty(init_args.user_state)) {
+        vectordraw.setState(init_args.user_state);
+        updateStatus(init_args.user_state);
+    }
 
-        // Load user state
-        if (!_.isEmpty(init_args.user_state)) {
-            vectordraw.setState(init_args.user_state);
-            updateStatus(init_args.user_state);
-        }
+    // Set up click handlers
+    $('.action .check', element).on('click', function(e) { checkAnswer(vectordraw); });
 
-        // Set up click handlers
-        $('.action .check', element).on('click', function(e) { checkAnswer(vectordraw); });
-
-    });
 }

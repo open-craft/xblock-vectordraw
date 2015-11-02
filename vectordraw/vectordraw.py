@@ -2,9 +2,9 @@
 
 import json
 import logging
-import pkg_resources
 
 from xblock.core import XBlock
+from xblock.exceptions import JsonHandlerError
 from xblock.fields import Scope, Boolean, Dict, Float, Integer, String
 from xblock.fragment import Fragment
 from xblockutils.resources import ResourceLoader
@@ -48,14 +48,14 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
     )
 
     height = Integer(
-        display_name="",
+        display_name="Height",
         help="The height of the board in pixels",
         default=400,
         scope=Scope.content
     )
 
     bounding_box_size = Integer(
-        display_name="",
+        display_name="Bounding box size",
         help=(
             "Defines the bounding box height of the graph area. "
             "The bounding box width is calculated from the width/height ratio."
@@ -183,7 +183,12 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
     )
 
     # User state
+
+    # Dictionary containing vectors and points present on the board when user last clicked "Check",
+    # as well as checks to perform in order to obtain grade
     answer = Dict(scope=Scope.user_state)
+    # Dictionary that represents result returned by the grader for the most recent answer;
+    # contains info about correctness of answer and feedback message
     result = Dict(scope=Scope.user_state)
 
     editable_fields = (
@@ -254,11 +259,6 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
     def expected_result_json(self):
         return json.loads(self.expected_result)
 
-    def resource_string(self, path):
-        """Handy helper for getting resources from our kit."""
-        data = pkg_resources.resource_string(__name__, path)
-        return data.decode("utf8")
-
     def student_view(self, context=None):
         """
         The primary view of the VectorDrawXBlock, shown to students
@@ -268,17 +268,53 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         fragment = Fragment()
         fragment.add_content(loader.render_template('static/html/vectordraw.html', context))
         fragment.add_css_url("//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css")
-        fragment.add_css(self.resource_string('static/css/vectordraw.css'))
+        fragment.add_css(loader.load_unicode('static/css/vectordraw.css'))
         fragment.add_javascript_url("//cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.98/jsxgraphcore.js")
-        fragment.add_javascript(self.resource_string("static/js/src/vectordraw.js"))
+        fragment.add_javascript(loader.load_unicode("static/js/src/vectordraw.js"))
         fragment.initialize_js('VectorDrawXBlock', {"settings": self.settings, "user_state": self.user_state})
         return fragment
+
+    def is_valid(self, data):
+        """
+        Validate answer data submitted by user.
+        """
+        # Check vectors
+        vectors = data.get('vectors')
+        if vectors is None:
+            return False
+        for vector_data in vectors.values():
+            # Validate vector
+            vector_valid = 'tip' in vector_data and 'tail' in vector_data
+            if not vector_valid:
+                return False
+            # Validate tip and tail
+            tip = vector_data['tip']
+            tip_valid = type(tip) == list and len(tip) == 2
+            tail = vector_data['tail']
+            tail_valid = type(tail) == list and len(tail) == 2
+            if not (tip_valid and tail_valid):
+                return False
+        # Check points
+        points = data.get('points')
+        if points is None:
+            return False
+        for coords in points.values():
+            # Validate point
+            point_valid = type(coords) == list and len(coords) == 2
+            if not point_valid:
+                break
+        # If we get to this point, it means that vector and point data is valid;
+        # the only thing left to check is whether data contains a list of checks:
+        return 'checks' in data
 
     @XBlock.json_handler
     def check_answer(self, data, suffix=''):
         """
         Check and persist student's answer to this vector drawing problem.
         """
+        # Validate data
+        if not self.is_valid(data):
+            raise JsonHandlerError(400, "Invalid data")
         # Save answer
         self.answer = dict(
             vectors=data["vectors"],

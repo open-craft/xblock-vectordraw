@@ -213,10 +213,6 @@ class Grader(object):
                 return {'ok': False, 'msg': result}
         return {'ok': True, 'msg': self.success_message}
 
-    def cfn(self, e, ans):
-        answer = json.loads(json.loads(ans)['answer'])
-        return self.grade(answer)
-
     def _get_vectors(self, answer):
         vectors = {}
         for name, props in answer['vectors'].iteritems():
