@@ -271,7 +271,15 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         """
         Load info about points for this exercise from JSON string specified by course author.
         """
-        return json.loads(self.points)
+        points = json.loads(self.points)
+        for point in points:
+            # If author did not specify whether point should be drawn in fixed location (True)
+            # or placed by student (False), we default to True;
+            # template needs this info to determine whether it should add option
+            # for selecting point to dropdown menu:
+            if 'fixed' not in point:
+                point['fixed'] = True
+        return points
 
     @property
     def get_expected_result(self):

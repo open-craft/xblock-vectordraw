@@ -92,45 +92,7 @@ function VectorDrawXBlock(runtime, element, init_args) {
         return settings;
     };
 
-    VectorDraw.prototype.template = _.template([
-        '<div class="jxgboard" style="width:<%= width %>px; height:<%= height %>px;" />',
-        '<div class="menu">',
-        '    <div class="controls">',
-        '        <select>',
-        '        <% vectors.forEach(function(vec, idx) { %>',
-        '            <option value="vector-<%= idx %>"><%= vec.description %></option>',
-        '        <% }) %>',
-        '        <% points.forEach(function(point, idx) { if (!point.fixed) { %>',
-        '            <option value="point-<%= idx %>"><%= point.description %></option>',
-        '        <% }}) %>',
-        '        </select>',
-        '        <button class="add-vector"><%= add_vector_label %></button>',
-        '        <button class="reset">Reset</button>',
-        '        <button class="undo" title="Undo"><span class="fa fa-undo" /></button>',
-        '        <button class="redo" title="redo"><span class="fa fa-repeat" /></button>',
-        '    </div>',
-        '    <% if (show_vector_properties) { %>',
-        '      <div class="vector-properties">',
-        '        <h3><%= vector_properties_label %></h3>',
-        '        <div class="vector-prop-name">',
-        '          name: <span class="value vector-prop-bold">-</span>',
-        '        </div>',
-        '        <div class="vector-prop-length">',
-        '          length: <span class="value">-</span>',
-        '        </div>',
-        '        <div class="vector-prop-angle">',
-        '          angle: <span class="value">-</span>&deg;',
-        '        </div>',
-        '        <div class="vector-prop-slope">',
-        '          slope: <span class="value">-</span>',
-        '        </div>',
-        '      </div>',
-        '    <% } %>',
-        '</div>'
-    ].join('\n'));
-
     VectorDraw.prototype.render = function() {
-        this.element.html(this.template(this.settings));
         // Assign the jxgboard element a random unique ID,
         // because JXG.JSXGraph.initBoard needs it.
         this.element.find('.jxgboard').prop('id', _.uniqueId('jxgboard'));
@@ -172,16 +134,33 @@ function VectorDrawXBlock(runtime, element, init_args) {
             }
         }
 
-        this.settings.points.forEach(function(point, idx) {
-            if (point.render) {
-                this.renderPoint(idx);
+        var noOptionSelected = true;
+
+        function renderOrEnableOption(element, idx, type, board) {
+            if (element.render) {
+                if (type === 'point') {
+                    board.renderPoint(idx);
+                } else {
+                    board.renderVector(idx);
+                }
+            } else {
+                // Enable corresponding option in menu ...
+                var option = board.getMenuOption(type, idx);
+                option.prop('disabled', false);
+                // ... and select it if no option is currently selected
+                if (noOptionSelected) {
+                    option.prop('selected', true);
+                    noOptionSelected = false;
+                }
             }
+        }
+
+        this.settings.points.forEach(function(point, idx) {
+            renderOrEnableOption(point, idx, 'point', this);
         }, this);
 
         this.settings.vectors.forEach(function(vec, idx) {
-            if (vec.render) {
-                this.renderVector(idx);
-            }
+            renderOrEnableOption(vec, idx, 'vector', this);
         }, this);
 
         this.board.on('down', this.onBoardDown.bind(this));
