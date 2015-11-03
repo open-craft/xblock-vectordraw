@@ -10,6 +10,12 @@ from xblock.fragment import Fragment
 from xblockutils.resources import ResourceLoader
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 
+try:
+    # Used to detect if we're in the workbench so we can add Underscore.js
+    from workbench.runtime import WorkbenchRuntime
+except ImportError:
+    WorkbenchRuntime = False  # pylint: disable=invalid-name
+
 from .grader import Grader
 
 
@@ -301,6 +307,11 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
             "//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css"
         )
         fragment.add_css(loader.load_unicode('static/css/vectordraw.css'))
+        # Workbench doesn't have Underscore.js, so add it:
+        if WorkbenchRuntime and isinstance(self.runtime, WorkbenchRuntime):
+            fragment.add_javascript_url(
+                "//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.2/underscore-min.js"
+            )
         fragment.add_javascript_url(
             "//cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.98/jsxgraphcore.js"
         )
@@ -368,17 +379,9 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
             "result": result,
         }
 
-    # TO-DO: change this to create the scenarios you'd like to see in the
-    # workbench while developing your XBlock.
     @staticmethod
     def workbench_scenarios():
-        """A canned scenario for display in the workbench."""
-        return [
-            ("VectorDrawXBlock",
-             """<vertical_demo>
-                <vectordraw/>
-                <vectordraw/>
-                <vectordraw/>
-                </vertical_demo>
-             """),
-        ]
+        """
+        Canned scenarios for display in the workbench.
+        """
+        return loader.load_scenarios_from_path('templates/xml')

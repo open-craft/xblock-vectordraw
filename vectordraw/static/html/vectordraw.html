@@ -9,7 +9,7 @@
   {% endif %}
 
   <div id="vectordraw">
-    <div class="jxgboard" style="width: {{ self.width }}px; height: {{ self.height }}px;" />
+    <div class="jxgboard" style="width: {{ self.width }}px; height: {{ self.height }}px;"></div>
     <div class="menu">
       <div class="controls">
         <select>
@@ -18,7 +18,6 @@
               {{ vector.description }}
             </option>
           {% endfor %}
-
           {% for point in self.get_points %}
             {% if not point.fixed %}
               <option value="point-{{ forloop.counter0 }}">

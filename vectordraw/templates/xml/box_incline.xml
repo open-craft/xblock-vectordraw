@@ -1,0 +1,13 @@
+<vertical_demo>
+  <vectordraw url_name="vectordraw_example"
+              description="&lt;p&gt;A box remains stationary on an inclined plane at an angle of 20 degrees with respect to the x-axis. Draw all appropriate vectors that define the force diagram for this system.&lt;/p&gt;&lt;p&gt;&lt;em&gt;Be sure that the &quot;tail&quot; of each vector starts at the center of mass of the box.&lt;/em&gt;&lt;/p&gt;"
+              width="550"
+              height="450"
+              bounding_box_size="8"
+              background_url="https://github.com/open-craft/jsinput-vectordraw/raw/master/Notes_and_Examples/2_boxIncline_multiVector/box_on_incline.png"
+              background_width="20"
+              vectors="[{&quot;name&quot;:&quot;N&quot;,&quot;description&quot;:&quot;Normal force - N&quot;,&quot;tail&quot;:[2,2],&quot;length&quot;:4,&quot;angle&quot;:45,&quot;render&quot;:true},{&quot;name&quot;:&quot;f&quot;,&quot;description&quot;:&quot;Friction - f&quot;,&quot;coords&quot;:[[-2,-5],[-1,-3]],&quot;render&quot;:false},{&quot;name&quot;:&quot;g&quot;,&quot;description&quot;:&quot;Gravity - g&quot;,&quot;tail&quot;:[0,1.5],&quot;length&quot;:5,&quot;angle&quot;:-75,&quot;render&quot;:false}]"
+              points="[{&quot;name&quot;:&quot;cm&quot;,&quot;coords&quot;:[-0.6,0.4],&quot;fixed&quot;:false,&quot;description&quot;:&quot;A simple point&quot;}]"
+              expected_result="{&quot;N&quot;:{&quot;angle&quot;:110,&quot;angle_tolerance&quot;:2,&quot;tail&quot;:[-0.6,0.4],&quot;tail_tolerance&quot;:0.5},&quot;g&quot;:{&quot;angle&quot;:270,&quot;angle_tolerance&quot;:2,&quot;tail&quot;:[-0.6,0.4],&quot;tail_tolerance&quot;:0.5},&quot;f&quot;:{&quot;angle&quot;:20,&quot;angle_tolerance&quot;:2,&quot;tail&quot;:[-0.6,0.4],&quot;tail_tolerance&quot;:0.5}}"
+              />
+</vertical_demo>
