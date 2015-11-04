@@ -228,10 +228,13 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         """
         Return settings for this exercise.
         """
+        width_scale = self.width / float(self.height)
+        box_size = self.bounding_box_size
+        bounding_box = [-box_size*width_scale, box_size, box_size*width_scale, -box_size]
         return {
             'width': self.width,
             'height': self.height,
-            'bounding_box_size': self.bounding_box_size,
+            'bounding_box': bounding_box,
             'axis': self.axis,
             'show_navigation': self.show_navigation,
             'show_vector_properties': self.show_vector_properties,
@@ -241,7 +244,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
             'background': self.background,
             'vectors': self.get_vectors,
             'points': self.get_points,
-            'expected_result': self.get_expected_result
+            'expected_result': self.get_expected_result,
         }
 
     @property
@@ -265,26 +268,83 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
             'height': self.background_height,
         }
 
+    def _get_default_vector(self):  # pylint: disable=no-self-use
+        """
+        Return dictionary that represents vector with default values filled in.
+        """
+        return {
+            'type': 'vector',
+            'render': False,
+            'length_factor': 1,
+            'length_units': '',
+            'base_angle': 0,
+            'style': {
+                'pointSize': 1,
+                'pointColor': 'red',
+                'width': 4,
+                'color': 'blue',
+                'label': None,
+                'labelColor': 'black'
+            }
+        }
+
     @property
     def get_vectors(self):
         """
-        Load info about vectors for this exercise from JSON string specified by course author.
+        Return info about vectors belonging to this exercise.
+
+        To do this, load vector info from JSON string specified by course author,
+        and augment it with default values that are required for rendering vectors on the client.
         """
-        return json.loads(self.vectors)
+        vectors = []
+        for vector in json.loads(self.vectors):
+            default_vector = self._get_default_vector()
+            default_vector_style = default_vector['style']
+            if 'style' in vector:
+                default_vector_style.update(vector['style'])
+                del vector['style']
+            default_vector.update(vector)
+            vectors.append(default_vector)
+        return vectors
+
+    def _get_default_point(self):  # pylint: disable=no-self-use
+        """
+        Return dictionary that represents point with default values filled in.
+        """
+        return {
+            'fixed': True,  # Default to True for backwards compatibility
+            'render': True,
+            'style': {
+                'size': 1,
+                'withLabel': False,
+                'color': 'pink',
+                'showInfoBox': False
+            }
+        }
 
     @property
     def get_points(self):
         """
-        Load info about points for this exercise from JSON string specified by course author.
+        Return info about points belonging to this exercise.
+
+        To do this, load point info from JSON string specified by course author,
+        and augment it with default values that are required for rendering points on the client.
         """
-        points = json.loads(self.points)
-        for point in points:
-            # If author did not specify whether point should be drawn in fixed location (True)
-            # or placed by student (False), we default to True;
-            # template needs this info to determine whether it should add option
-            # for selecting point to dropdown menu:
-            if 'fixed' not in point:
-                point['fixed'] = True
+        points = []
+        for point in json.loads(self.points):
+            default_point = self._get_default_point()
+            default_point_style = default_point['style']
+            if 'style' in point:
+                default_point_style.update(point['style'])
+                del point['style']
+            default_point.update(point)
+            default_point_style['name'] = default_point['name']
+            default_point_style['fixed'] = default_point['fixed']
+            point_color = default_point_style['color']
+            default_point_style['strokeColor'] = point_color
+            default_point_style['fillColor'] = point_color
+            del default_point_style['color']
+            points.append(default_point)
         return points
 
     @property
@@ -300,13 +360,14 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         The primary view of the VectorDrawXBlock, shown to students
         when viewing courses.
         """
+        context = context or {}
         context['self'] = self
         fragment = Fragment()
-        fragment.add_content(loader.render_template('static/html/vectordraw.html', context))
+        fragment.add_content(loader.render_template('templates/html/vectordraw.html', context))
         fragment.add_css_url(
             "//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css"
         )
-        fragment.add_css(loader.load_unicode('static/css/vectordraw.css'))
+        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/vectordraw.css'))
         # Workbench doesn't have Underscore.js, so add it:
         if WorkbenchRuntime and isinstance(self.runtime, WorkbenchRuntime):
             fragment.add_javascript_url(
@@ -315,41 +376,42 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         fragment.add_javascript_url(
             "//cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.98/jsxgraphcore.js"
         )
-        fragment.add_javascript(loader.load_unicode("static/js/src/vectordraw.js"))
+        fragment.add_javascript_url(
+            self.runtime.local_resource_url(self, 'public/js/vectordraw.js')
+        )
         fragment.initialize_js(
             'VectorDrawXBlock', {"settings": self.settings, "user_state": self.user_state}
         )
         return fragment
 
-    def is_valid(self, data):  # pylint: disable=no-self-use
+    def _validate_check_answer_data(self, data):  # pylint: disable=no-self-use
         """
         Validate answer data submitted by user.
         """
         # Check vectors
         vectors = data.get('vectors')
-        if vectors is None:
+        if not isinstance(vectors, dict):
             return False
         for vector_data in vectors.values():
             # Validate vector
-            vector_valid = 'tip' in vector_data and 'tail' in vector_data
-            if not vector_valid:
+            if not vector_data.viewkeys() == {'tail', 'tip'}:
                 return False
             # Validate tip and tail
             tip = vector_data['tip']
-            tip_valid = type(tip) == list and len(tip) == 2
+            tip_valid = isinstance(tip, list) and len(tip) == 2
             tail = vector_data['tail']
-            tail_valid = type(tail) == list and len(tail) == 2
+            tail_valid = isinstance(tail, list) and len(tail) == 2
             if not (tip_valid and tail_valid):
                 return False
         # Check points
         points = data.get('points')
-        if points is None:
+        if not isinstance(points, dict):
             return False
         for coords in points.values():
             # Validate point
-            point_valid = type(coords) == list and len(coords) == 2
+            point_valid = isinstance(coords, list) and len(coords) == 2
             if not point_valid:
-                break
+                return False
         # If we get to this point, it means that vector and point data is valid;
         # the only thing left to check is whether data contains a list of checks:
         return 'checks' in data
@@ -360,7 +422,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         Check and persist student's answer to this vector drawing problem.
         """
         # Validate data
-        if not self.is_valid(data):
+        if not self._validate_check_answer_data(data):
             raise JsonHandlerError(400, "Invalid data")
         # Save answer
         self.answer = dict(

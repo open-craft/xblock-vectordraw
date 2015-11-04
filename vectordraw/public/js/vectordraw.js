@@ -9,7 +9,7 @@ function VectorDrawXBlock(runtime, element, init_args) {
         this.dragged_vector = null;
         this.drawMode = false;
         this.history_stack = {undo: [], redo: []};
-        this.settings = this.sanitizeSettings(settings);
+        this.settings = settings;
         this.element = $('#' + element_id);
 
         this.element.on('click', '.reset', this.reset.bind(this));
@@ -20,76 +20,6 @@ function VectorDrawXBlock(runtime, element, init_args) {
         this.element.on('mousedown', '.jxgboard image', function(evt) { evt.preventDefault(); });
 
         this.render();
-    };
-
-    VectorDraw.prototype.sanitizeSettings = function(settings) {
-        // Fill in defaults at top level of settings.
-        var default_settings = {
-            width: 550,
-            height: 400,
-            axis: false,
-            background: null,
-            bounding_box_size: 10,
-            show_navigation: false,
-            show_vector_properties: true,
-            add_vector_label: 'Add Selected Force',
-            vector_properties_label: 'Vector Properties',
-            vectors: [],
-            points: [],
-            expected_result: {},
-            custom_checks: [],
-            unit_vector_ratio: 1
-        };
-        _.defaults(settings, default_settings);
-        var width_scale = settings.width / settings.height,
-            box_size = settings.bounding_box_size;
-        settings.bounding_box = [-box_size*width_scale, box_size, box_size*width_scale, -box_size];
-
-        // Fill in defaults for vectors.
-        var default_vector = {
-            type: 'vector',
-            render: false,
-            length_factor: 1,
-            length_units: '',
-            base_angle: 0,
-            style: {}
-        };
-        var default_vector_style = {
-            pointSize: 1,
-            pointColor: 'red',
-            width: 4,
-            color: "blue",
-            label: null,
-            labelColor: 'black'
-        };
-        settings.vectors.forEach(function(vector) {
-            _.defaults(vector, default_vector);
-            _.defaults(vector.style, default_vector_style);
-        });
-
-        // Fill in defaults for points.
-        var default_point = {
-            fixed: true,  // Default to true for backwards compatibility.
-            render: true,
-            style: {}
-        };
-        var default_point_style = {
-            size: 1,
-            withLabel: false,
-            color: 'pink',
-            showInfoBox: false
-        };
-        settings.points.forEach(function(point) {
-            _.defaults(point, default_point);
-            _.defaults(point.style, default_point_style);
-            point.style.name = point.name;
-            point.style.fixed = point.fixed;
-            point.style.strokeColor = point.style.color;
-            point.style.fillColor = point.style.color;
-            delete point.style.color;
-        });
-
-        return settings;
     };
 
     VectorDraw.prototype.render = function() {
@@ -112,7 +42,7 @@ function VectorDrawXBlock(runtime, element, init_args) {
         });
 
         function getImageRatio(bg, callback) {
-            $('<img/>').attr('src', bg.src).load(function(){
+            $('<img/>').attr('src', bg.src).load(function() {
                 //technically it's inverse of ratio, but we need it to calculate height
                 var ratio = this.height / this.width;
                 callback(bg, ratio);
@@ -562,7 +492,7 @@ function VectorDrawXBlock(runtime, element, init_args) {
             });
         });
 
-        input.checks = checks.concat(vectordraw.settings.custom_checks);
+        input.checks = checks;
 
         return input;
     }

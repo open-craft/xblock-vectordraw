@@ -27,6 +27,7 @@
 }
 
 .vectordraw_block .menu .controls {
+    display: table;
     margin-bottom: 20px;
     font-size: 0;
 }
@@ -39,7 +40,7 @@
 
 .vectordraw_block .menu .controls button {
     display: inline-block;
-    background-color: #3498db;
+    background-color: #c2e0f4;
     border-radius: 5px;
     box-shadow: 0 1px 3px #666;
     color: #1f628d;
@@ -52,22 +53,19 @@
 }
 
 .vectordraw_block .menu .controls button:hover {
-    background: #3cb0fd;
-    background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
-    background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
-    background-image: -ms-linear-gradient(top, #3cb0fd, #3498db);
-    background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
-    background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
+    background: #c2e0f4;
+    background-image: -webkit-linear-gradient(top, #c2e0f4, #add5f0);
+    background-image: -moz-linear-gradient(top, #c2e0f4, #add5f0);
+    background-image: -ms-linear-gradient(top, #c2e0f4, #add5f0);
+    background-image: -o-linear-gradient(top, #c2e0f4, #add5f0);
+    background-image: linear-gradient(to bottom, #c2e0f4, #add5f0);
     text-decoration: none;
 }
 
-vectordraw_block .menu .controls button.undo,
-vectordraw_block .menu .controls button.redo {
-    width: 78px;
-}
-
-.vectordraw_block .menu .controls button.undo {
-    margin-right: 4px;
+.vectordraw_block .menu .controls button.undo,
+.vectordraw_block .menu .controls button.redo {
+    display: table-cell;
+    width: 50%;
 }
 
 .vectordraw_block .menu .vector-properties {
