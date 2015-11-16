@@ -51,10 +51,7 @@ class TestVectorDraw(StudioEditableBaseTest):
     def check_axis(self, board, is_present=False):
         text_elements = board.find_elements_by_css_selector(".JXGtext")
         ticks = any("ticks" in text_element.get_attribute("id") for text_element in text_elements)
-        if is_present:
-            self.assertTrue(ticks)
-        else:
-            self.assertFalse(ticks)
+        self.assertEquals(ticks, is_present)
 
     def check_navigation_bar(self, board, is_present=False):
         if is_present:
@@ -138,10 +135,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         for element, element_option in zip(elements, element_options):
             self.assertEquals(element_option.text, element["description"])
             option_disabled = element_option.get_attribute("disabled")
-            if element["render"]:
-                self.assertTrue(option_disabled)
-            else:
-                self.assertFalse(option_disabled)
+            self.assertEquals(bool(option_disabled), element["render"])
 
     def check_vectors(self, board, vectors):
         line_elements = board.find_elements_by_css_selector("line")
@@ -171,16 +165,13 @@ class TestVectorDraw(StudioEditableBaseTest):
         point_elements = board.find_elements_by_css_selector("ellipse")
         for point in points:
             board_has_point = self.board_has_point(point["expected_position"], point_elements)
-            if point["render"]:
-                self.assertTrue(board_has_point)
-            else:
-                self.assertFalse(board_has_point)
+            self.assertEquals(board_has_point, point["render"])
 
     def board_has_line(self, position, line_elements):
-        return True if self.find_line(position, line_elements) else False
+        return bool(self.find_line(position, line_elements))
 
     def board_has_point(self, position, point_elements):
-        return True if self.find_point(position, point_elements) else False
+        return bool(self.find_point(position, point_elements))
 
     def board_has_label(self, board, label_text):
         text_elements = board.find_elements_by_css_selector(".JXGtext")
@@ -191,24 +182,24 @@ class TestVectorDraw(StudioEditableBaseTest):
         return False
 
     def find_line(self, position, line_elements):
-        expected_line_position = set(position.items())
+        expected_line_position = position.items()
         for line in line_elements:
-            line_position = set({
+            line_position = {
                 "x1": int(float(line.get_attribute("x1"))),
                 "y1": int(float(line.get_attribute("y1"))),
                 "x2": int(float(line.get_attribute("x2"))),
                 "y2": int(float(line.get_attribute("y2"))),
-            }.items())
+            }.items()
             if line_position == expected_line_position:
                 return line
 
     def find_point(self, position, point_elements):
-        expected_position = set(position.items())
+        expected_position = position.items()
         for point in point_elements:
-            point_position = set({
+            point_position = {
                 "cx": int(float(point.get_attribute("cx"))),
                 "cy": int(float(point.get_attribute("cy"))),
-            }.items())
+            }.items()
             if point_position == expected_position:
                 return point
 
