@@ -138,7 +138,9 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         help=(
             "List of vectors to use for the exercise. "
             "You must specify it as an array of entries "
-            "where each entry represents an individual vector."
+            "where each entry represents an individual vector. "
+            "Note that edits to vectors made via the WYSIWYG editor below "
+            "take precedence over changes you make here when saving."
         ),
         default="[]",
         multiline_editor=True,
@@ -381,6 +383,39 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         )
         fragment.initialize_js(
             'VectorDrawXBlock', {"settings": self.settings, "user_state": self.user_state}
+        )
+        return fragment
+
+    def studio_view(self, context):
+        fragment = Fragment()
+        context = {'fields': [], 'self': self}
+        # Build a list of all the fields that can be edited:
+        for field_name in self.editable_fields:
+            field = self.fields[field_name]
+            assert field.scope in (Scope.content, Scope.settings), (
+                "Only Scope.content or Scope.settings fields can be used with "
+                "StudioEditableXBlockMixin. Other scopes are for user-specific data and are "
+                "not generally created/configured by content authors in Studio."
+            )
+            field_info = self._make_field_info(field_name, field)
+            if field_info is not None:
+                context["fields"].append(field_info)
+        fragment.add_content(loader.render_template("templates/html/vectordraw_edit.html", context))
+        # Add resources to studio_view fragment
+        fragment.add_css_url(
+            self.runtime.local_resource_url(self, 'public/css/vectordraw_edit.css')
+        )
+        fragment.add_javascript_url(
+            "//cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.98/jsxgraphcore.js"
+        )
+        fragment.add_javascript_url(
+            self.runtime.local_resource_url(self, 'public/js/studio_edit.js')
+        )
+        fragment.add_javascript_url(
+            self.runtime.local_resource_url(self, 'public/js/vectordraw_edit.js')
+        )
+        fragment.initialize_js(
+            'VectorDrawXBlockEdit', {"settings": self.settings}
         )
         return fragment
 

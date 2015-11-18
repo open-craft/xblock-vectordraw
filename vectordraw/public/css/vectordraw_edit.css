@@ -1,0 +1,29 @@
+.vectordraw_edit_block {
+    border-top: 1px solid #e5e5e5;
+    margin-left: 20px;
+    margin-right: 20px;
+    padding-top: 20px;
+}
+
+.vectordraw_edit_block h2 {
+    margin-bottom: 1em;
+}
+
+.vectordraw_edit_block p {
+    margin-bottom: 1em;
+    font-size: 0.9em;
+}
+
+.vectordraw_edit_block #vectordraw {
+    margin-bottom: 1.5em;
+}
+
+.vectordraw_edit_block .jxgboard {
+    border: 2px solid #1f628d;
+    margin-bottom: 1em;
+}
+
+.vectordraw_edit_block .jxgboard .JXGtext {
+    pointer-events: none;  /* prevents cursor from turning into caret when over a label */
+}
+

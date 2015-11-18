@@ -10,7 +10,7 @@ function VectorDrawXBlock(runtime, element, init_args) {
         this.drawMode = false;
         this.history_stack = {undo: [], redo: []};
         this.settings = settings;
-        this.element = $('#' + element_id);
+        this.element = $('#' + element_id, element);
 
         this.element.on('click', '.reset', this.reset.bind(this));
         this.element.on('click', '.add-vector', this.addElementFromList.bind(this));
@@ -140,20 +140,6 @@ function VectorDrawXBlock(runtime, element, init_args) {
             coords = [tail, tip];
         }
         return coords;
-    };
-
-    VectorDraw.prototype.getVectorStyle = function(vec) {
-        //width, color, size of control point, label (which should be a JSXGraph option)
-        var default_style = {
-            pointSize: 1,
-            pointColor: 'red',
-            width: 4,
-            color: "blue",
-            label: null,
-            labelColor: 'black'
-        };
-
-        return _.extend(default_style, vec.style);
     };
 
     VectorDraw.prototype.renderVector = function(idx, coords) {
