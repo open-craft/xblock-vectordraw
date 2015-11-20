@@ -21,35 +21,36 @@
 }
 
 .vectordraw_block .menu {
-    float: left;
-    width: 160px;
-    margin-left: 15px;
+    width: 100%;
 }
 
 .vectordraw_block .menu .controls {
-    display: table;
-    margin-bottom: 20px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-top: 2px solid rgb(31, 98, 141);
+    border-left: 2px solid #1f628d;
+    border-right: 2px solid #1f628d;
+    padding: 3px;
+    background-color: rgb(224, 224, 224);
     font-size: 0;
 }
 
 .vectordraw_block .menu .controls select {
     width: 160px;
-    margin-bottom: 8px;
+    margin-right: 3px;
     font-size: 18px;
 }
 
 .vectordraw_block .menu .controls button {
-    display: inline-block;
-    background-color: #c2e0f4;
+    border: 1px solid #1f628d;
     border-radius: 5px;
+    margin: 4px 0;
+    padding: 5px 10px 5px 10px;
     box-shadow: 0 1px 3px #666;
+    background-color: #c2e0f4;
     color: #1f628d;
     font-size: 14px;
-    padding: 5px 10px 5px 10px;
-    margin: 4px 0;
-    border: 2px solid #1f628d;
     text-decoration: none;
-    width: 160px;
 }
 
 .vectordraw_block .menu .controls button:hover {
@@ -62,17 +63,21 @@
     text-decoration: none;
 }
 
+.vectordraw_block .menu .controls button.reset,
 .vectordraw_block .menu .controls button.undo,
 .vectordraw_block .menu .controls button.redo {
-    display: table-cell;
-    width: 50%;
+    float: right;
 }
 
 .vectordraw_block .menu .vector-properties {
+    border-top: 2px solid rgb(31, 98, 141);
+    border-left: 2px solid rgb(31, 98, 141);
+    border-right: 2px solid rgb(31, 98, 141);
+    border-bottom: 0px none;
     padding: 10px;
-    border: 1px solid #1f628d;
     font-size: 16px;
     line-height: 1.25;
+    background-color: rgba(239, 239, 239, 0.5);
 }
 
 .vectordraw_block .menu .vector-properties h3 {

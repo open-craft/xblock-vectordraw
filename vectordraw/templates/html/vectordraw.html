@@ -1,3 +1,4 @@
+{% load i18n %}
 <div class="vectordraw_block">
 
   <h2>{{ self.display_name }}</h2>
@@ -9,7 +10,6 @@
   {% endif %}
 
   <div id="vectordraw">
-    <div class="jxgboard" style="width: {{ self.width }}px; height: {{ self.height }}px;"></div>
     <div class="menu">
       <div class="controls">
         <select>
@@ -30,27 +30,28 @@
           {{ self.add_vector_label }}
         </button>
         <button class="reset">Reset</button>
+        <button class="redo" title="Redo"><span class="fa fa-repeat" /></button>
         <button class="undo" title="Undo"><span class="fa fa-undo" /></button>
-        <button class="redo" title="redo"><span class="fa fa-repeat" /></button>
       </div>
       {% if self.show_vector_properties %}
       <div class="vector-properties">
         <h3>{{ self.vector_properties_label }}</h3>
         <div class="vector-prop-name">
-          name: <span class="value vector-prop-bold">-</span>
+          {% trans "name" %}: <span class="value vector-prop-bold">-</span>
         </div>
         <div class="vector-prop-length">
-          length: <span class="value">-</span>
+          {% trans "length" %}: <span class="value">-</span>
         </div>
         <div class="vector-prop-angle">
-          angle: <span class="value">-</span>&deg;
+          {% trans "angle" %}: <span class="value">-</span>&deg;
         </div>
         <div class="vector-prop-slope">
-          slope: <span class="value">-</span>
+          {% trans "slope" %}: <span class="value">-</span>
         </div>
       </div>
       {% endif %}
     </div>
+    <div class="jxgboard" style="width: {{ self.width }}px; height: {{ self.height }}px;"></div>
   </div>
 
   <div class="vectordraw-status">
@@ -60,8 +61,8 @@
 
   <div class="action">
     <button class="check">
-      <span class="check-label">Check</span>
-      <span class="sr"> your answer</span>
+      <span class="check-label">{% trans "Check" %}</span>
+      <span class="sr"> {% trans "your answer" %}</span>
     </button>
   </div>
 
