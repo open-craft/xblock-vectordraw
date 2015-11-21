@@ -114,7 +114,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         actions = self.exercise.find_element_by_css_selector(".action")
         self.assertTrue(actions.is_displayed())
         check = actions.find_element_by_css_selector(".check")
-        self.assertEquals(check.text, "CHECK YOUR ANSWER")
+        self.assertEquals(check.text, "CHECK")
 
     def check_dropdown(self, controls, vectors=[], points=[]):
         dropdown = controls.find_element_by_css_selector("select")
