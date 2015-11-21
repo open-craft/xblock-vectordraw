@@ -27,11 +27,11 @@
 .vectordraw_block .menu .controls {
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
-    border-top: 2px solid rgb(31, 98, 141);
+    border-top: 2px solid #1f628d;
     border-left: 2px solid #1f628d;
     border-right: 2px solid #1f628d;
     padding: 3px;
-    background-color: rgb(224, 224, 224);
+    background-color: #e0e0e0;
     font-size: 0;
 }
 
@@ -70,14 +70,14 @@
 }
 
 .vectordraw_block .menu .vector-properties {
-    border-top: 2px solid rgb(31, 98, 141);
-    border-left: 2px solid rgb(31, 98, 141);
-    border-right: 2px solid rgb(31, 98, 141);
+    border-top: 2px solid #1f628d;
+    border-left: 2px solid #1f628d;
+    border-right: 2px solid #1f628d;
     border-bottom: 0px none;
     padding: 10px;
     font-size: 16px;
     line-height: 1.25;
-    background-color: rgba(239, 239, 239, 0.5);
+    background-color: #f7f7f7;
 }
 
 .vectordraw_block .menu .vector-properties h3 {
