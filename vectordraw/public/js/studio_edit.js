@@ -4,6 +4,7 @@ function StudioEditableXBlockMixin(runtime, element) {
 
     var fields = [];
     var tinyMceAvailable = (typeof $.fn.tinymce !== 'undefined'); // Studio includes a copy of tinyMCE and its jQuery plugin
+    var errorMessage = gettext("This may be happening because of an error with our server or your internet connection. Try refreshing the page or making sure you are online.");
 
     $(element).find('.field-data-control').each(function() {
         var $field = $(this);
@@ -71,20 +72,20 @@ function StudioEditableXBlockMixin(runtime, element) {
             url: handlerUrl,
             data: JSON.stringify(data),
             dataType: "json",
-            global: false,  // Disable Studio's error handling that conflicts with studio's notify('save') and notify('cancel') :-/
-            success: function(response) { runtime.notify('save', {state: 'end'}); }
+            global: false  // Disable Studio's error handling that conflicts with studio's notify('save') and notify('cancel') :-/
+        }).done(function(response) {
+            runtime.notify('save', {state: 'end'});
         }).fail(function(jqXHR) {
-            var message = gettext("This may be happening because of an error with our server or your internet connection. Try refreshing the page or making sure you are online.");
             if (jqXHR.responseText) { // Is there a more specific error message we can show?
                 try {
-                    message = JSON.parse(jqXHR.responseText).error;
-                    if (typeof message === "object" && message.messages) {
+                    errorMessage = JSON.parse(jqXHR.responseText).error;
+                    if (typeof errorMessage === "object" && errorMessage.messages) {
                         // e.g. {"error": {"messages": [{"text": "Unknown user 'bob'!", "type": "error"}, ...]}} etc.
-                        message = $.map(message.messages, function(msg) { return msg.text; }).join(", ");
+                        errorMessage = $.map(errorMessage.messages, function(msg) { return msg.text; }).join(", ");
                     }
-                } catch (error) { message = jqXHR.responseText.substr(0, 300); }
+                } catch (error) { errorMessage = jqXHR.responseText.substr(0, 300); }
             }
-            runtime.notify('error', {title: gettext("Unable to update settings"), message: message});
+            runtime.notify('error', {title: gettext("Unable to update settings"), message: errorMessage});
         });
     };
 

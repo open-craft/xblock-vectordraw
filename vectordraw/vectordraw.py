@@ -139,8 +139,9 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
             "List of vectors to use for the exercise. "
             "You must specify it as an array of entries "
             "where each entry represents an individual vector. "
-            "Note that edits to vectors made via the WYSIWYG editor below "
-            "take precedence over changes you make here when saving."
+            "Note that you can also use the WYSIWYG editor below to create or modify vectors. "
+            "If you do, any changes you make here will be overwritten by vector data "
+            "from the WYSIWYG editor when saving."
         ),
         default="[]",
         multiline_editor=True,
