@@ -10,6 +10,10 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         this.numberOfVectors = this.settings.vectors.length;
         this.element = $('#' + element_id, element);
 
+        this.element.on('click', '.add-vector', this.onAddVector.bind(this));
+        this.element.on('change', '.menu .element-list-edit', this.onEditStart.bind(this));
+        this.element.on('click', '.menu .vector-prop-update', this.onEditSubmit.bind(this));
+        this.element.on('click', '.vector-remove', this.onRemoveVector.bind(this));
         // Prevents default image drag and drop actions in some browsers.
         this.element.on('mousedown', '.jxgboard image', function(evt) { evt.preventDefault(); });
 
@@ -17,6 +21,7 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
     };
 
     VectorDraw.prototype.render = function() {
+        $('.vector-prop-slope', this.element).hide();
         // Assign the jxgboard element a random unique ID,
         // because JXG.JSXGraph.initBoard needs it.
         this.element.find('.jxgboard').prop('id', _.uniqueId('jxgboard'));
@@ -49,7 +54,8 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         function drawBackground(bg, ratio) {
             var height = (bg.height) ? bg.height : bg.width * ratio;
             var coords = (bg.coords) ? bg.coords : [-bg.width/2, -height/2];
-            self.board.create('image', [bg.src, coords, [bg.width, height]], {fixed: true});
+            var image = self.board.create('image', [bg.src, coords, [bg.width, height]], {fixed: true});
+            $(image.rendNode).attr('alt', bg.description);
         }
 
         if (this.settings.background) {
@@ -163,6 +169,66 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         return line;
     };
 
+    VectorDraw.prototype.getEditMenuOption = function(type, idx) {
+        return this.element.find('.menu .element-list-edit option[value=' + type + '-' + idx + ']');
+    };
+
+    VectorDraw.prototype.onAddVector = function(evt) {
+        if (!this.wasUsed) {
+            this.wasUsed = true;
+        }
+        // Add vector that starts at center of board and has a predefined length and angle
+        var defaultCoords = [[0, 0], [0, 3]],
+            defaultVector = this.getDefaultVector(defaultCoords);
+        this.settings.vectors.push(defaultVector);
+        var lastIndex = this.numberOfVectors - 1,
+            vector = this.renderVector(lastIndex);
+        this.addEditMenuOption(defaultVector.name, lastIndex);
+        this.updateVectorProperties(vector);
+    };
+
+    VectorDraw.prototype.addEditMenuOption = function(vectorName, idx) {
+        // 1. Find dropdown for selecting vector to edit
+        var editMenu = this.element.find('.menu .element-list-edit');
+        // 2. Remove current selection(s)
+        editMenu.find('option').attr('selected', false);
+        // 3. Create option for newly added vector
+        var newOption = $('<option>')
+            .attr('value', 'vector-' + idx)
+            .attr('data-vector-name', vectorName)
+            .text(vectorName);
+        // 4. Append option to dropdown
+        editMenu.append(newOption);
+        // 5. Select newly added option
+        newOption.attr('selected', true);
+    };
+
+    VectorDraw.prototype.onRemoveVector = function(evt) {
+        if (!this.wasUsed) {
+            this.wasUsed = true;
+        }
+        // 1. Remove selected vector from board
+        var vectorName = $('.element-list-edit', element).find('option:selected').data('vector-name');
+        var boardObject = this.board.elementsByName[vectorName];
+        this.board.removeAncestors(boardObject);
+        // 2. Mark vector as "deleted" so it will be removed from "vectors" field on save
+        var vectorSettings = this.getVectorSettingsByName("" + vectorName);
+        vectorSettings.deleted = true;
+        // 3. Remove entry that corresponds to selected vector from menu for selecting vector to edit
+        var idx = _.indexOf(this.settings.vectors, vectorSettings),
+            editOption = this.getEditMenuOption("vector", idx);
+        editOption.remove();
+        // 4. Reset input fields for vector properties to default values
+        this.resetVectorProperties();
+    };
+
+    VectorDraw.prototype.resetVectorProperties = function(vector) {
+        // Select default value
+        $('.menu .element-list-edit option[value="-"]', element).attr('selected', true);
+        // Reset input fields to default values
+        $('.menu .vector-prop-list input', element).val('-');
+    };
+
     VectorDraw.prototype.getMouseCoords = function(evt) {
         var i = evt[JXG.touchProperty] ? 0 : undefined;
         var c_pos = this.board.getCoordsTopLeftCorner(evt, i);
@@ -184,6 +250,51 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
             return _.find(obj.descendants, function (d) { return (d instanceof JXG.Line); });
         }
         return null;
+    };
+
+    VectorDraw.prototype.getVectorSettingsByName = function(name) {
+        return _.find(this.settings.vectors, function(vec) {
+            return vec.name === name;
+        });
+    };
+
+    VectorDraw.prototype.updateVectorProperties = function(vector) {
+        var vec_settings = this.getVectorSettingsByName(vector.name);
+        var x1 = vector.point1.X(),
+            y1 = vector.point1.Y(),
+            x2 = vector.point2.X(),
+            y2 = vector.point2.Y();
+        var length = vec_settings.length_factor * Math.sqrt(Math.pow(x2-x1, 2) + Math.pow(y2-y1, 2));
+        var angle = ((Math.atan2(y2-y1, x2-x1)/Math.PI*180) - vec_settings.base_angle) % 360;
+        if (angle < 0) {
+            angle += 360;
+        }
+        var slope = (y2-y1)/(x2-x1);
+        // Update menu for selecting vector to edit
+        this.element.find('.menu .element-list-edit option').attr('selected', false);
+        var idx = _.indexOf(this.settings.vectors, vec_settings),
+            editOption = this.getEditMenuOption("vector", idx);
+        editOption.attr('selected', true);
+        // Update properties
+        $('.vector-prop-angle input', this.element).val(angle.toFixed(2));
+        if (vector.elType !== "line") {
+            var tailInput = x1.toFixed(2) + ", " + y1.toFixed(2);
+            var lengthInput = length.toFixed(2);
+            if (vec_settings.length_units) {
+                lengthInput += ' ' + vec_settings.length_units;
+            }
+            $('.vector-prop-tail input', this.element).val(tailInput);
+            $('.vector-prop-length', this.element).show();
+            $('.vector-prop-length input', this.element).val(lengthInput);
+            $('.vector-prop-slope', this.element).hide();
+        }
+        else {
+            $('.vector-prop-length', this.element).hide();
+            if (this.settings.show_slope_for_lines) {
+                $('.vector-prop-slope', this.element).show();
+                $('.vector-prop-slope input', this.element).val(slope.toFixed(2));
+            }
+        }
     };
 
     VectorDraw.prototype.isVectorTailDraggable = function(vector) {
@@ -261,6 +372,7 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
             if (vectorPoint) {
                 this.dragged_vector = this.getVectorForObject(vectorPoint);
                 this.dragged_vector.point1.setProperty({fixed: false});
+                this.updateVectorProperties(this.dragged_vector);
             }
         }
     };
@@ -269,6 +381,9 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         if (this.drawMode) {
             var coords = this.getMouseCoords(evt);
             this.dragged_vector.point2.moveTo(coords.usrCoords);
+        }
+        if (this.dragged_vector) {
+            this.updateVectorProperties(this.dragged_vector);
         }
     };
 
@@ -283,6 +398,45 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         this.dragged_vector = null;
     };
 
+    VectorDraw.prototype.onEditStart = function(evt) {
+        var vectorName = $(evt.currentTarget).find('option:selected').data('vector-name');
+        var vectorObject = this.board.elementsByName[vectorName];
+        this.updateVectorProperties(vectorObject);
+    };
+
+    VectorDraw.prototype.onEditSubmit = function(evt) {
+        if (!this.wasUsed) {
+            this.wasUsed = true;
+        }
+        // Get vector that is currently "selected"
+        var vectorName = $('.element-list-edit', element).find('option:selected').data('vector-name');
+        // Get values from input fields
+        var newTail = $('.vector-prop-tail input', element).val(),
+            newLength = $('.vector-prop-length input', element).val(),
+            newAngle = $('.vector-prop-angle input', element).val();
+        // Process values
+        newTail = _.map(newTail.split(', '), function(coord) {
+            return parseFloat(coord);
+        });
+        newLength = parseFloat(newLength);
+        newAngle = parseFloat(newAngle);
+        var values = [newTail[0], newTail[1], newLength, newAngle];
+        // Validate values
+        if (!_.some(values, Number.isNaN)) {
+            // Use coordinates of new tail, new length, new angle to calculate new position of tip
+            var radians = newAngle * Math.PI / 180;
+            var newTip = [
+                newTail[0] + Math.cos(radians) * newLength,
+                newTail[1] + Math.sin(radians) * newLength
+            ];
+            // Update position of vector
+            var board_object = this.board.elementsByName[vectorName];
+            board_object.point1.setPosition(JXG.COORDS_BY_USER, newTail);
+            board_object.point2.setPosition(JXG.COORDS_BY_USER, newTip);
+            this.board.update();
+        }
+    };
+
     VectorDraw.prototype.getVectorCoords = function(name) {
         var object = this.board.elementsByName[name];
         return {
@@ -294,6 +448,9 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
     VectorDraw.prototype.getState = function() {
         var vectors = [];
         this.settings.vectors.forEach(function(vec) {
+            if (vec.deleted) {
+                return;
+            }
             var coords = this.getVectorCoords(vec.name),
                 tail = coords.tail,
                 tip = coords.tip,

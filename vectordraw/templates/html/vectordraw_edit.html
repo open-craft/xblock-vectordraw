@@ -73,14 +73,91 @@
             To add a vector, left-click the board where you want the vector to originate.
             Keep holding down the left mouse button and drag your mouse pointer across the board
             to achieve the desired length and angle for the vector.
+            Alternatively, you can click "Create vector", which will add a new vector
+            that starts at the center of the board and has a predefined length (3) and angle (90).
+
             To modify an existing vector, left-click it, hold down the left mouse button,
             and move your mouse pointer across the board.
+            Alternatively, you can select an existing vector from the dropdown menu
+            modify its tail position, length, and angle by changing the values
+            in the corresponding input fields, and click "Update" to update its position on the board.
+
+            To remove an existing vector, left-click it or select it from the dropdown menu,
+            then click "Remove".
+
             Note that if you make changes using the board below, any changes you made via the "Vectors" field above
             will be overwritten when you save the settings for this exercise by clicking the "Save" button below.
             {% endblocktrans %}
           </p>
 
           <div id="vectordraw">
+            <div class="menu" style="width: {{ self.menu_width }}px;">
+              <div class="controls">
+                <button class="add-vector">{% trans "Create vector" %}</button>
+              </div>
+              <div class="vector-properties" aria-live="polite">
+                <h3>{{ self.vector_properties_label }}</h3>
+                <div class="vector-prop-list">
+                  <div class="row">
+                    <div class="vector-prop-name">
+                      <span id="vector-prop-name-label">
+                        {% trans "name" %}:
+                      </span>
+                      <select class="element-list-edit" aria-labelledby="vector-prop-name-label">
+                        <option value="-" selected="selected" disabled="disabled">-</option>
+                        {% for vector in self.get_vectors %}
+                          <option value="vector-{{ forloop.counter0 }}" data-vector-name="{{ vector.name }}">
+                            {{ vector.name }}
+                          </option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="vector-prop-tail">
+                      <span id="vector-prop-tail-label">
+                        {% trans "tail position" %}:
+                      </span>
+                      <input type="text" value="-" aria-labelledby="vector-prop-tail-label">
+                    </div>
+                    <div class="vector-prop-length">
+                      <span id="vector-prop-length-label">
+                        {% trans "length" %}:
+                      </span>
+                      <input type="text" value="-" aria-labelledby="vector-prop-length-label">
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="vector-prop-angle">
+                      <span id="vector-prop-angle-label">
+                        {% trans "angle" %}:
+                      </span>
+                      <input type="text" value="-" aria-labelledby="vector-prop-angle-label">
+                    </div>
+                    <div class="vector-prop-slope">
+                      <span id="vector-prop-slope-label">
+                        {% trans "slope" %}:
+                      </span>
+                      <input type="text" value="-" aria-labelledby="vector-prop-slope-label" disabled="disabled">
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="vector-prop-update">
+                      <button class="update">
+                        <span class="update-label" aria-hidden="true">{% trans "Update" %}</span>
+                        <span class="sr">{% trans "Update properties of selected element" %}</span>
+                      </button>
+                    </div>
+                    <div class="vector-remove">
+                      <button class="remove">
+                        <span class="remove-label" aria-hidden="true">{% trans "Remove" %}</span>
+                        <span class="sr">{% trans "Remove selected element" %}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="jxgboard"
                  style="width: {{ self.width }}px; height: {{ self.height }}px;"
                  tabindex="0">

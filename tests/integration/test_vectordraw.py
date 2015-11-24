@@ -29,6 +29,10 @@ class TestVectorDraw(StudioEditableBaseTest):
         else:
             self.fail(errmsg)
 
+    def check_hidden_text(self, selector, expected_text):
+        hidden_text = self.browser.execute_script("return $('{}').text();".format(selector))
+        self.assertEquals(hidden_text, expected_text)
+
     def check_title_and_description(self, expected_title="Vector Drawing", expected_description=None):
         title = self.exercise.find_element_by_css_selector("h2")
         self.assertEquals(title.text, expected_title)
@@ -70,6 +74,8 @@ class TestVectorDraw(StudioEditableBaseTest):
             self.assertTrue(background.is_displayed())
             src = background.get_attribute("xlink:href")
             self.assertEquals(src, "https://github.com/open-craft/jsinput-vectordraw/raw/master/Notes_and_Examples/2_boxIncline_multiVector/box_on_incline.png")
+            alt = background.get_attribute("alt")
+            self.assertEquals(alt, "A very informative description")
         else:
             self.assert_not_present(
                 board,
@@ -78,29 +84,42 @@ class TestVectorDraw(StudioEditableBaseTest):
             )
 
     def check_buttons(self, controls, add_vector_label="Add Selected Force"):
+        # "Add vector" button
         add_vector = controls.find_element_by_css_selector(".add-vector")
         self.assertEquals(add_vector.text, add_vector_label)
+        # "Reset" button
         reset = controls.find_element_by_css_selector(".reset")
         self.assertEquals(reset.text, "Reset")
-        undo = controls.find_element_by_css_selector(".undo")
-        undo.find_element_by_css_selector(".fa.fa-undo")
+        reset.find_element_by_css_selector(".sr")
+        self.check_hidden_text(".reset > .sr", "Reset board to initial state")
+        # "Redo" button
         redo = controls.find_element_by_css_selector(".redo")
         redo.find_element_by_css_selector(".fa.fa-repeat")
+        redo.find_element_by_css_selector(".sr")
+        self.check_hidden_text(".redo > .sr", "Redo last action")
+        # "Undo" button
+        undo = controls.find_element_by_css_selector(".undo")
+        undo.find_element_by_css_selector(".fa.fa-undo")
+        undo.find_element_by_css_selector(".sr")
+        self.check_hidden_text(".undo > .sr", "Undo last action")
 
     def check_vector_properties(
             self, menu, is_present=False, expected_label="Vector Properties",
-            expected_name=None, expected_length=None, expected_angle=None
+            expected_name=None, expected_tail=None, expected_length=None, expected_angle=None
     ):
         if is_present:
             vector_properties = menu.find_element_by_css_selector(".vector-properties")
             vector_properties_label = vector_properties.find_element_by_css_selector("h3")
             self.assertEquals(vector_properties_label.text, expected_label)
-            vector_name = vector_properties.find_element_by_css_selector(".vector-prop-name")
-            self.assertEquals(vector_name.text, "name: {}".format(expected_name or "-"))
-            vector_length = vector_properties.find_element_by_css_selector(".vector-prop-length")
-            self.assertEquals(vector_length.text, "length: {}".format(expected_length or "-"))
-            vector_angle = vector_properties.find_element_by_css_selector(".vector-prop-angle")
-            self.assertTrue(vector_angle.text.startswith("angle: {}".format(expected_angle or "-")))
+            # Name
+            self.check_vector_property(vector_properties, "name", "select", "name:", expected_name or "-")
+            # Tail
+            self.check_vector_property(vector_properties, "tail", "input", "tail position:", expected_tail or "-")
+            # Length
+            self.check_vector_property(vector_properties, "length", "input", "length:", expected_length or "-")
+            # Angle
+            self.check_vector_property(vector_properties, "angle", "input", "angle:", expected_angle or "-")
+            # Slope
             vector_slope = vector_properties.find_element_by_css_selector(".vector-prop-slope")
             self.assertFalse(vector_slope.is_displayed())
         else:
@@ -110,13 +129,36 @@ class TestVectorDraw(StudioEditableBaseTest):
                 "If show_vector_properties is set to False, menu should not show vector properties."
             )
 
+    def check_vector_property(
+            self, vector_properties, property_name, input_type, expected_label, expected_value=None
+    ):
+        vector_property = vector_properties.find_element_by_css_selector(
+            ".vector-prop-{}".format(property_name)
+        )
+        vector_property_label = vector_property.find_element_by_css_selector(
+            "#vector-prop-{}-label".format(property_name)
+        )
+        self.assertEquals(vector_property_label.text, expected_label)
+        vector_property_input = vector_property.find_element_by_css_selector(input_type)
+        self.assertEquals(
+            vector_property_input.get_attribute("aria-labelledby"), "vector-prop-{}-label".format(property_name)
+        )
+        if input_type == "input":
+            self.assertEquals(vector_property_input.get_attribute("value"), expected_value)
+        else:
+            selected_option = vector_property_input.find_element_by_css_selector('option[selected="selected"]')
+            self.assertEquals(selected_option.text, expected_value)
+
     def check_actions(self):
         actions = self.exercise.find_element_by_css_selector(".action")
         self.assertTrue(actions.is_displayed())
         check = actions.find_element_by_css_selector(".check")
         self.assertEquals(check.text, "CHECK")
+        check.find_element_by_css_selector(".sr")
+        self.check_hidden_text(".check > .sr", "Check your answer")
 
-    def check_dropdown(self, controls, vectors=[], points=[]):
+    def check_add_dropdown(self, controls, vectors=[], points=[]):
+        # Check dropdown
         dropdown = controls.find_element_by_css_selector("select")
         if not vectors and not points:
             self.assert_not_present(
@@ -125,17 +167,47 @@ class TestVectorDraw(StudioEditableBaseTest):
                 "Dropdown should not list any vectors or points by default."
             )
         else:
-            self.check_options(dropdown, vectors, "vector")
+            self.check_add_options(dropdown, vectors, "vector")
             non_fixed_points = [point for point in points if not point["fixed"]]
-            self.check_options(dropdown, non_fixed_points, "point")
+            self.check_add_options(dropdown, non_fixed_points, "point")
+        # Check label
+        label_id = "element-list-add-label"
+        label_selector = "#" + label_id
+        controls.find_element_by_css_selector(label_selector)
+        self.check_hidden_text(label_selector, "Select element to add to board")
+        self.assertEquals(dropdown.get_attribute("aria-labelledby"), label_id)
 
-    def check_options(self, dropdown, elements, element_type):
+    def check_add_options(self, dropdown, elements, element_type):
         element_options = dropdown.find_elements_by_css_selector('option[value^="{}-"]'.format(element_type))
         self.assertEquals(len(element_options), len(elements))
         for element, element_option in zip(elements, element_options):
             self.assertEquals(element_option.text, element["description"])
             option_disabled = element_option.get_attribute("disabled")
             self.assertEquals(bool(option_disabled), element["render"])
+
+    def check_edit_dropdown(self, menu, vectors=[], points=[]):
+        vector_properties = menu.find_element_by_css_selector(".vector-properties")
+        # Check dropdown
+        dropdown = vector_properties.find_element_by_css_selector("select")
+        if not vectors and not points:
+            options = dropdown.find_elements_by_css_selector("option")
+            self.assertEquals(len(options), 1)
+            default_option = options[0]
+            self.assertEquals(default_option.get_attribute("value"), "-")
+        else:
+            if vectors:
+                self.check_edit_options(dropdown, vectors, "vector")
+            if points:
+                non_fixed_points = [point for point in points if not point["fixed"]]
+                self.check_edit_options(dropdown, non_fixed_points, "point")
+
+    def check_edit_options(self, dropdown, elements, element_type):
+        element_options = dropdown.find_elements_by_css_selector('option[value^="{}-"]'.format(element_type))
+        self.assertEquals(len(element_options), len(elements))
+        for element, element_option in zip(elements, element_options):
+            self.assertEquals(element_option.text, element["name"])
+            option_disabled = element_option.get_attribute("disabled")
+            self.assertNotEquals(bool(option_disabled), element["render"])
 
     def check_vectors(self, board, vectors):
         line_elements = board.find_elements_by_css_selector("line")
@@ -168,7 +240,8 @@ class TestVectorDraw(StudioEditableBaseTest):
             self.assertEquals(board_has_point, point["render"])
 
     def board_has_line(self, position, line_elements):
-        return bool(self.find_line(position, line_elements))
+        line = self.find_line(position, line_elements)
+        return bool(line) and self.line_has_title(line) and self.line_has_desc(line)
 
     def board_has_point(self, position, point_elements):
         return bool(self.find_point(position, point_elements))
@@ -180,6 +253,16 @@ class TestVectorDraw(StudioEditableBaseTest):
             if not is_tick and text_element.text == label_text:
                 return True
         return False
+
+    def line_has_title(self, line):
+        title = line.find_element_by_css_selector("title")
+        title_id = title.get_attribute("id")
+        aria_labelledby = line.get_attribute("aria-labelledby")
+        return title_id == aria_labelledby
+
+    def line_has_desc(self, line):
+        aria_describedby = line.get_attribute("aria-describedby")
+        return aria_describedby == "jxgboard1-vector-properties"
 
     def find_line(self, position, line_elements):
         expected_line_position = position.items()
@@ -197,8 +280,8 @@ class TestVectorDraw(StudioEditableBaseTest):
         expected_position = position.items()
         for point in point_elements:
             point_position = {
-                "cx": int(float(point.get_attribute("cx"))),
-                "cy": int(float(point.get_attribute("cy"))),
+                "cx": int(round(float(point.get_attribute("cx")))),
+                "cy": int(round(float(point.get_attribute("cy")))),
             }.items()
             if point_position == expected_position:
                 return point
@@ -214,8 +297,9 @@ class TestVectorDraw(StudioEditableBaseTest):
         # "Vector Properties" should display correct info
         self.check_vector_properties(
             menu, is_present=True, expected_label="Custom properties label",
-            expected_name="N", expected_length="4.00", expected_angle="45.00"
+            expected_name="N", expected_tail="2.00, 2.00", expected_length="4.00", expected_angle="45.00"
         )
+        self.check_edit_dropdown(menu, vectors)
 
     def add_point(self, board, points):
         menu = self.exercise.find_element_by_css_selector(".menu")
@@ -246,7 +330,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         # "Vector Properties" should display correct info
         self.check_vector_properties(
             menu, is_present=True, expected_label="Custom properties label",
-            expected_name="N", expected_length="4.00", expected_angle="45.00"
+            expected_name="N", expected_tail="2.00, 2.00", expected_length="4.00", expected_angle="45.00"
         )
 
     def reset(self, board, vectors, points):
@@ -277,6 +361,21 @@ class TestVectorDraw(StudioEditableBaseTest):
         status_message = status.find_element_by_css_selector(".status-message")
         self.assertEquals(status_message.text, expected_message)
 
+    def change_property(self, property_name, new_value):
+        menu = self.exercise.find_element_by_css_selector(".menu")
+        vector_properties = menu.find_element_by_css_selector(".vector-properties")
+        vector_property = vector_properties.find_element_by_css_selector(
+            ".vector-prop-{}".format(property_name)
+        )
+        vector_property_input = vector_property.find_element_by_css_selector("input")
+        # Enter new value
+        vector_property_input.clear()
+        vector_property_input.send_keys(new_value)
+        # Find "Update" button
+        update_button = vector_properties.find_element_by_css_selector(".vector-prop-update")
+        # Click "Update" button
+        update_button.click()
+
     def test_defaults(self):
         self.load_scenario("xml/defaults.xml")
 
@@ -305,9 +404,10 @@ class TestVectorDraw(StudioEditableBaseTest):
         # Check menu
         menu = self.exercise.find_element_by_css_selector(".menu")
         controls = menu.find_element_by_css_selector(".controls")
-        self.check_dropdown(controls)
+        self.check_add_dropdown(controls)
         self.check_buttons(controls)
         self.check_vector_properties(menu, is_present=True)
+        self.check_edit_dropdown(menu)
 
         # Check actions
         self.check_actions()
@@ -398,11 +498,12 @@ class TestVectorDraw(StudioEditableBaseTest):
         # Check menu
         menu = self.exercise.find_element_by_css_selector(".menu")
         controls = menu.find_element_by_css_selector(".controls")
-        self.check_dropdown(controls, vectors, points)
+        self.check_add_dropdown(controls, vectors, points)
         self.check_buttons(controls, add_vector_label="Custom button label")
         show_vector_properties = params["show_vector_properties"]
         if show_vector_properties:
             self.check_vector_properties(menu, is_present=True, expected_label="Custom properties label")
+            self.check_edit_dropdown(menu, vectors, points)
         else:
             self.check_vector_properties(menu)
 
@@ -451,7 +552,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         menu = self.exercise.find_element_by_css_selector(".menu")
         self.check_vector_properties(
             menu, is_present=True, expected_label="Custom properties label",
-            expected_name="N", expected_length="4.00", expected_angle="45.00"
+            expected_name="N", expected_tail="2.00, 2.00", expected_length="4.00", expected_angle="45.00"
         )
 
     @data(
@@ -758,3 +859,147 @@ class TestVectorDraw(StudioEditableBaseTest):
             self.check_status(
                 answer_correct=False, expected_message="Vector N does not start at correct point."
             )
+
+    @data(
+        {
+            "show_vector_properties": True,
+            "vectors": json.dumps([
+                {
+                    "name": "N",
+                    "description": "Normal force - N",
+                    "tail": [2, 2],
+                    "length": 4,
+                    "angle": 45,
+                    "render": False,
+                    "expected_line_position": {"x1": 347, "y1": 181, "x2": 402, "y2": 125},
+                    "expected_tail_position": {"cx": 347, "cy": 181},
+                    "expected_tip_position": {"cx": 411, "cy": 117},
+                }
+            ]),
+            "points": json.dumps([]),
+            "expected_result": json.dumps({})
+        }
+    )
+    def test_change_tail_property(self, params):
+        self.load_scenario("xml/custom.xml", params=params)
+        board = self.exercise.find_element_by_css_selector("#jxgboard1")
+        # Board should not show vector initially
+        vectors = json.loads(params["vectors"])
+        self.check_vectors(board, vectors)
+        # Add vector
+        self.add_vector(board, vectors)
+        # Change tail
+        self.change_property("tail", "3, 3")
+        # Check new position: Tail updated, tip updated
+        vectors[0]["expected_line_position"] = {'x1': 370, 'y1': 159, 'x2': 425, 'y2': 102}
+        vectors[0]["expected_tail_position"] = {'cx': 370, 'cy': 159}
+        vectors[0]["expected_tip_position"] = {'cx': 434, 'cy': 94}
+        self.check_vectors(board, vectors)
+
+    @data(
+        {
+            "show_vector_properties": True,
+            "vectors": json.dumps([
+                {
+                    "name": "N",
+                    "description": "Normal force - N",
+                    "tail": [2, 2],
+                    "length": 4,
+                    "angle": 45,
+                    "render": False,
+                    "expected_line_position": {"x1": 347, "y1": 181, "x2": 402, "y2": 125},
+                    "expected_tail_position": {"cx": 347, "cy": 181},
+                    "expected_tip_position": {"cx": 411, "cy": 117},
+                }
+            ]),
+            "points": json.dumps([]),
+            "expected_result": json.dumps({})
+        }
+    )
+    def test_change_length_property(self, params):
+        self.load_scenario("xml/custom.xml", params=params)
+        board = self.exercise.find_element_by_css_selector("#jxgboard1")
+        # Board should not show vector initially
+        vectors = json.loads(params["vectors"])
+        self.check_vectors(board, vectors)
+        # Add vector
+        self.add_vector(board, vectors)
+        # Change tail
+        self.change_property("length", "6")
+        # Check new position: Tail unchanged, tip updated
+        vectors[0]["expected_line_position"] = {'x1': 347, 'y1': 181, 'x2': 434, 'y2': 93}
+        vectors[0]["expected_tail_position"] = {'cx': 347, 'cy': 181}
+        vectors[0]["expected_tip_position"] = {'cx': 443, 'cy': 85}
+        self.check_vectors(board, vectors)
+
+    @data(
+        {
+            "show_vector_properties": True,
+            "vectors": json.dumps([
+                {
+                    "name": "N",
+                    "description": "Normal force - N",
+                    "tail": [2, 2],
+                    "length": 4,
+                    "angle": 45,
+                    "render": False,
+                    "expected_line_position": {"x1": 347, "y1": 181, "x2": 402, "y2": 125},
+                    "expected_tail_position": {"cx": 347, "cy": 181},
+                    "expected_tip_position": {"cx": 411, "cy": 117},
+                }
+            ]),
+            "points": json.dumps([]),
+            "expected_result": json.dumps({})
+        }
+    )
+    def test_change_angle_property(self, params):
+        self.load_scenario("xml/custom.xml", params=params)
+        board = self.exercise.find_element_by_css_selector("#jxgboard1")
+        # Board should not show vector initially
+        vectors = json.loads(params["vectors"])
+        self.check_vectors(board, vectors)
+        # Add vector
+        self.add_vector(board, vectors)
+        # Change tail
+        self.change_property("angle", "170")
+        # Check new position: Tail unchanged, tip updated
+        vectors[0]["expected_line_position"] = {'x1': 347, 'y1': 181, 'x2': 269, 'y2': 167}
+        vectors[0]["expected_tail_position"] = {'cx': 347, 'cy': 181}
+        vectors[0]["expected_tip_position"] = {'cx': 258, 'cy': 165}
+        self.check_vectors(board, vectors)
+
+    @data(
+        {
+            "show_vector_properties": True,
+            "vectors": json.dumps([
+                {
+                    "name": "N",
+                    "description": "Normal force - N",
+                    "tail": [2, 2],
+                    "length": 4,
+                    "angle": 45,
+                    "render": False,
+                    "expected_line_position": {"x1": 347, "y1": 181, "x2": 402, "y2": 125},
+                    "expected_tail_position": {"cx": 347, "cy": 181},
+                    "expected_tip_position": {"cx": 411, "cy": 117},
+                }
+            ]),
+            "points": json.dumps([]),
+            "expected_result": json.dumps({})
+        }
+    )
+    def test_change_property_invalid_input(self, params):
+        self.load_scenario("xml/custom.xml", params=params)
+        board = self.exercise.find_element_by_css_selector("#jxgboard1")
+        # Board should not show vector initially
+        vectors = json.loads(params["vectors"])
+        self.check_vectors(board, vectors)
+        # Add vector
+        self.add_vector(board, vectors)
+        # Change tail
+        self.change_property("tail", "invalid")
+        # Check new position: Tail unchanged, tip unchanged
+        vectors[0]["expected_line_position"] = {'x1': 347, 'y1': 181, 'x2': 402, 'y2': 125}
+        vectors[0]["expected_tail_position"] = {'cx': 347, 'cy': 181}
+        vectors[0]["expected_tip_position"] = {'cx': 411, 'cy': 117}
+        self.check_vectors(board, vectors)

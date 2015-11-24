@@ -7,6 +7,7 @@ from xblock.core import XBlock
 from xblock.exceptions import JsonHandlerError
 from xblock.fields import Scope, Boolean, Dict, Float, Integer, String
 from xblock.fragment import Fragment
+from xblock.validation import ValidationMessage
 from xblockutils.resources import ResourceLoader
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 
@@ -133,6 +134,17 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         scope=Scope.content
     )
 
+    background_description = String(
+        display_name="Background description",
+        help=(
+            "Please provide a description of the image for non-visual users. "
+            "The description should provide sufficient information that would allow anyone "
+            "to solve the problem if the image did not load."
+        ),
+        default="",
+        scope=Scope.content
+    )
+
     vectors = String(
         display_name="Vectors",
         help=(
@@ -218,6 +230,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         'background_url',
         'background_width',
         'background_height',
+        'background_description',
         'vectors',
         'points',
         'expected_result',
@@ -251,6 +264,14 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         }
 
     @property
+    def menu_width(self):
+        """
+        Width of SVG canvas (controlled by JSXGraph) consistently ends up being 4px larger
+        than self.width. Adjust menu size accordingly to ensure that board and menu line up.
+        """
+        return self.width + 4
+
+    @property
     def user_state(self):
         """
         Return user state, which is a combination of most recent answer and result.
@@ -269,6 +290,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
             'src': self.background_url,
             'width': self.background_width,
             'height': self.background_height,
+            'description': self.background_description,
         }
 
     def _get_default_vector(self):  # pylint: disable=no-self-use
@@ -419,6 +441,32 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
             'VectorDrawXBlockEdit', {"settings": self.settings}
         )
         return fragment
+
+    def validate_field_data(self, validation, data):
+        """
+        Validate this block's field data.
+        """
+        super(VectorDrawXBlock, self).validate_field_data(validation, data)
+
+        def add_error(msg):
+            """ Helper function for adding validation messages. """
+            validation.add(ValidationMessage(ValidationMessage.ERROR, msg))
+
+        if data.background_url.strip():
+            if data.background_width == 0 and data.background_height == 0:
+                add_error(
+                    u"You specified a background image but no width or height. "
+                    "For the image to display, you need to specify a non-zero value "
+                    "for at least one of them."
+                )
+            if not data.background_description.strip():
+                add_error(
+                    u"No background description set. "
+                    "This means that it will be more difficult for non-visual users "
+                    "to solve the problem. "
+                    "Please provide a description that contains sufficient information "
+                    "that would allow anyone to solve the problem if the image did not load."
+                )
 
     def _validate_check_answer_data(self, data):  # pylint: disable=no-self-use
         """
