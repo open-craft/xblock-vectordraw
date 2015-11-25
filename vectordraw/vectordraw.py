@@ -178,7 +178,11 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         display_name="Expected result",
         help=(
             "Defines vector properties for grading. "
-            "Vectors omitted from this setting are ignored when grading."
+            "Vectors omitted from this setting are ignored when grading. "
+            "Note that you can also use the WYSIWYG editor below to opt in and out of checks "
+            "for individual vectors. "
+            "If you use the WYSIWYG editor at all, any changes you make here "
+            "will be overwritten when saving."
         ),
         default="{}",
         multiline_editor=True,
@@ -205,6 +209,11 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         scope=Scope.settings,
         enforce_type=True
     )
+
+    # Dictionary that keeps track of vector positions for correct answer;
+    # treated as an editable field but hidden from author in Studio
+    # since changes to it are implicit
+    expected_result_positions = Dict(scope=Scope.content)
 
     # User state
 
@@ -234,6 +243,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         'vectors',
         'points',
         'expected_result',
+        'expected_result_positions',
         'custom_checks'
     )
 
@@ -261,6 +271,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
             'vectors': self.get_vectors,
             'points': self.get_points,
             'expected_result': self.get_expected_result,
+            'expected_result_positions': self.expected_result_positions,
         }
 
     @property
@@ -406,6 +417,8 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         context = {'fields': [], 'self': self}
         # Build a list of all the fields that can be edited:
         for field_name in self.editable_fields:
+            if field_name == "expected_result_positions":
+                continue
             field = self.fields[field_name]
             assert field.scope in (Scope.content, Scope.settings), (
                 "Only Scope.content or Scope.settings fields can be used with "

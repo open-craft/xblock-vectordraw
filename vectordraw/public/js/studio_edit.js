@@ -91,6 +91,10 @@ function StudioEditableXBlockMixin(runtime, element) {
 
     return {
 
+        getContents: function(fieldName) {
+            return _.findWhere(fields, {name: fieldName}).val();
+        },
+
         save: function(data) {
             var values = {};
             var notSet = []; // List of field names that should be set to default values
@@ -107,9 +111,12 @@ function StudioEditableXBlockMixin(runtime, element) {
                     field.removeEditor();
                 }
             }
-            // If WYSIWYG editor was used, prefer its data over value of "vectors" field:
-            if (data.vectors) {
+            // If WYSIWYG editor was used,
+            // prefer its data over values of "Vectors" and "Expected result" fields:
+            if (!_.isEmpty(data)) {
                 values.vectors = JSON.stringify(data.vectors, undefined, 4);
+                values.expected_result_positions = data.expected_result_positions;
+                values.expected_result = JSON.stringify(data.expected_result, undefined, 4);
             }
 
             studio_submit({values: values, defaults: notSet});
