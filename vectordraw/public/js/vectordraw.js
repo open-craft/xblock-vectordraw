@@ -606,10 +606,23 @@ function VectorDrawXBlock(runtime, element, init_args) {
             .success(updateStatus);
     }
 
+    // Logic for dealing with rendering issues
+
+    function reRender() {
+        JXG.JSXGraph.freeBoard(vectordraw.board);
+        vectordraw.render();
+    }
+
     // Initialization logic
 
     // Initialize exercise
     var vectordraw = new VectorDraw('vectordraw', init_args.settings);
+
+    // Check if board was initialized successfully;
+    // if not, re-render the exercise:
+    if (vectordraw.board.canvasWidth === 0 && vectordraw.board.canvasHeight === 0) {
+        window.setTimeout(reRender, 1);
+    }
 
     // Load user state
     if (!_.isEmpty(init_args.user_state)) {
