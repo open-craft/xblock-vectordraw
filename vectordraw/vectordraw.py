@@ -264,14 +264,6 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         }
 
     @property
-    def menu_width(self):
-        """
-        Width of SVG canvas (controlled by JSXGraph) consistently ends up being 4px larger
-        than self.width. Adjust menu size accordingly to ensure that board and menu line up.
-        """
-        return self.width + 4
-
-    @property
     def user_state(self):
         """
         Return user state, which is a combination of most recent answer and result.
@@ -425,6 +417,9 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
                 context["fields"].append(field_info)
         fragment.add_content(loader.render_template("templates/html/vectordraw_edit.html", context))
         # Add resources to studio_view fragment
+        fragment.add_css_url(
+            self.runtime.local_resource_url(self, 'public/css/vectordraw.css')
+        )
         fragment.add_css_url(
             self.runtime.local_resource_url(self, 'public/css/vectordraw_edit.css')
         )

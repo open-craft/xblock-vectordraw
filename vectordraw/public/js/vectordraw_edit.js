@@ -415,7 +415,7 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
             newLength = $('.vector-prop-length input', element).val(),
             newAngle = $('.vector-prop-angle input', element).val();
         // Process values
-        newTail = _.map(newTail.split(', '), function(coord) {
+        newTail = _.map(newTail.split(/ *, */), function(coord) {
             return parseFloat(coord);
         });
         newLength = parseFloat(newLength);
@@ -423,6 +423,7 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         var values = [newTail[0], newTail[1], newLength, newAngle];
         // Validate values
         if (!_.some(values, Number.isNaN)) {
+            $('.vector-prop-update .update-error', element).css('visibility', 'hidden');
             // Use coordinates of new tail, new length, new angle to calculate new position of tip
             var radians = newAngle * Math.PI / 180;
             var newTip = [
@@ -434,6 +435,8 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
             board_object.point1.setPosition(JXG.COORDS_BY_USER, newTail);
             board_object.point2.setPosition(JXG.COORDS_BY_USER, newTip);
             this.board.update();
+        } else {
+            $('.vector-prop-update .update-error', element).css('visibility', 'visible');
         }
     };
 

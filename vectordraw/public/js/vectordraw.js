@@ -68,8 +68,6 @@ function VectorDrawXBlock(runtime, element, init_args) {
             }
         }
 
-        var noAddOptionSelected = true;
-
         function renderAndSetMenuOptions(element, idx, type, board) {
             if (element.render) {
                 if (type === 'point') {
@@ -82,9 +80,8 @@ function VectorDrawXBlock(runtime, element, init_args) {
                 var addOption = board.getAddMenuOption(type, idx);
                 addOption.prop('disabled', false);
                 // ... and select it if no option is currently selected
-                if (noAddOptionSelected) {
+                if ($('.menu .element-list-add option').filter(':selected').length === 0) {
                     addOption.prop('selected', true);
-                    noAddOptionSelected = false;
                 }
                 // Disable corresponding option in menu for editing vectors
                 var editOption = board.getEditMenuOption(type, idx);
@@ -473,7 +470,7 @@ function VectorDrawXBlock(runtime, element, init_args) {
             newLength = $('.vector-prop-length input', element).val(),
             newAngle = $('.vector-prop-angle input', element).val();
         // Process values
-        newTail = _.map(newTail.split(', '), function(coord) {
+        newTail = _.map(newTail.split(/ *, */), function(coord) {
             return parseFloat(coord);
         });
         newLength = parseFloat(newLength);
@@ -481,6 +478,7 @@ function VectorDrawXBlock(runtime, element, init_args) {
         var values = [newTail[0], newTail[1], newLength, newAngle];
         // Validate values
         if (!_.some(values, Number.isNaN)) {
+            $('.vector-prop-update .update-error', element).css('visibility', 'hidden');
             // Use coordinates of new tail, new length, new angle to calculate new position of tip
             var radians = newAngle * Math.PI / 180;
             var newTip = [
@@ -492,6 +490,8 @@ function VectorDrawXBlock(runtime, element, init_args) {
             board_object.point1.setPosition(JXG.COORDS_BY_USER, newTail);
             board_object.point2.setPosition(JXG.COORDS_BY_USER, newTip);
             this.board.update();
+        } else {
+            $('.vector-prop-update .update-error', element).css('visibility', 'visible');
         }
     };
 
@@ -606,31 +606,22 @@ function VectorDrawXBlock(runtime, element, init_args) {
             .success(updateStatus);
     }
 
-    // Logic for dealing with rendering issues
-
-    function reRender() {
-        JXG.JSXGraph.freeBoard(vectordraw.board);
-        vectordraw.render();
-    }
-
     // Initialization logic
 
-    // Initialize exercise
-    var vectordraw = new VectorDraw('vectordraw', init_args.settings);
+    // Initialize exercise.
+    // Defer it so that we don't try to initialize it for a hidden element (in Studio);
+    // JSXGraph has problems rendering a board if the containing element is hidden.
+    window.setTimeout(function() {
+        var vectordraw = new VectorDraw('vectordraw', init_args.settings);
 
-    // Check if board was initialized successfully;
-    // if not, re-render the exercise:
-    if (vectordraw.board.canvasWidth === 0 && vectordraw.board.canvasHeight === 0) {
-        window.setTimeout(reRender, 1);
-    }
+        // Load user state
+        if (!_.isEmpty(init_args.user_state)) {
+            vectordraw.setState(init_args.user_state);
+            updateStatus(init_args.user_state);
+        }
 
-    // Load user state
-    if (!_.isEmpty(init_args.user_state)) {
-        vectordraw.setState(init_args.user_state);
-        updateStatus(init_args.user_state);
-    }
-
-    // Set up click handlers
-    $('.action .check', element).on('click', function(e) { checkAnswer(vectordraw); });
+        // Set up click handlers
+        $('.action .check', element).on('click', function(e) { checkAnswer(vectordraw); });
+    }, 0);
 
 }

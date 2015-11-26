@@ -10,7 +10,7 @@
   {% endif %}
 
   <div id="vectordraw">
-    <div class="menu" style="width: {{ self.menu_width }}px;">
+    <div class="menu" style="width: {{ self.width }}px;">
       <div class="controls">
         <span class="sr" id="element-list-add-label">{% trans "Select element to add to board" %}</span>
         <select class="element-list-add" aria-labelledby="element-list-add-label">
@@ -48,7 +48,7 @@
         <h3>{{ self.vector_properties_label }}</h3>
         <div class="vector-prop-list">
           <div class="row">
-            <div class="vector-prop-name">
+            <div class="vector-prop vector-prop-name">
               <span id="vector-prop-name-label">
                 {% trans "name" %}:
               </span>
@@ -70,13 +70,13 @@
             </div>
           </div>
           <div class="row">
-            <div class="vector-prop-tail">
+            <div class="vector-prop vector-prop-tail">
               <span id="vector-prop-tail-label">
                 {% trans "tail position" %}:
               </span>
               <input type="text" value="-" aria-labelledby="vector-prop-tail-label">
             </div>
-            <div class="vector-prop-length">
+            <div class="vector-prop vector-prop-length">
               <span id="vector-prop-length-label">
                 {% trans "length" %}:
               </span>
@@ -84,13 +84,13 @@
             </div>
           </div>
           <div class="row">
-            <div class="vector-prop-angle">
+            <div class="vector-prop vector-prop-angle">
               <span id="vector-prop-angle-label">
                 {% trans "angle" %}:
               </span>
               <input type="text" value="-" aria-labelledby="vector-prop-angle-label">
             </div>
-            <div class="vector-prop-slope">
+            <div class="vector-prop vector-prop-slope">
               <span id="vector-prop-slope-label">
                 {% trans "slope" %}:
               </span>
@@ -98,11 +98,12 @@
             </div>
           </div>
           <div class="row">
-            <div class="vector-prop-update">
+            <div class="vector-prop vector-prop-update">
               <button class="update">
                 <span class="update-label" aria-hidden="true">{% trans "Update" %}</span>
                 <span class="sr">{% trans "Update properties of selected element" %}</span>
               </button>
+              <span class="update-error">{% trans "Invalid input." %}</span>
             </div>
           </div>
         </div>

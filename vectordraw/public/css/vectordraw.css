@@ -26,15 +26,23 @@
     width: 100%;
 }
 
+.vectordraw_block .menu,
 .vectordraw_block .menu .controls {
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
+    background-color: #e0e0e0;
+    font-size: 0;
+}
+
+.vectordraw_block .menu {
     border-top: 2px solid #1f628d;
     border-left: 2px solid #1f628d;
     border-right: 2px solid #1f628d;
+}
+
+.vectordraw_block .menu .controls {
+    border-bottom: 2px solid #1f628d;
     padding: 3px;
-    background-color: #e0e0e0;
-    font-size: 0;
 }
 
 .vectordraw_block .menu .controls select {
@@ -72,10 +80,6 @@
 }
 
 .vectordraw_block .menu .vector-properties {
-    border-top: 2px solid #1f628d;
-    border-left: 2px solid #1f628d;
-    border-right: 2px solid #1f628d;
-    border-bottom: 0px none;
     padding: 10px;
     font-size: 16px;
     line-height: 1.25;
@@ -96,16 +100,7 @@
     display: table-row;
 }
 
-.vectordraw_block .menu .vector-properties .vector-prop-list .row .vector-prop-name,
-.vectordraw_block .menu .vector-properties .vector-prop-list .row .vector-prop-tail,
-.vectordraw_block .menu .vector-properties .vector-prop-list .row .vector-prop-tail-label,
-.vectordraw_block .menu .vector-properties .vector-prop-list .row .vector-prop-length,
-.vectordraw_block .menu .vector-properties .vector-prop-list .row .vector-prop-length-label,
-.vectordraw_block .menu .vector-properties .vector-prop-list .row .vector-prop-angle,
-.vectordraw_block .menu .vector-properties .vector-prop-list .row .vector-prop-angle-label,
-.vectordraw_block .menu .vector-properties .vector-prop-list .row .vector-prop-slope,
-.vectordraw_block .menu .vector-properties .vector-prop-list .row .vector-prop-slope-label,
-.vectordraw_block .menu .vector-properties .vector-prop-list .row .vector-prop-update {
+.vectordraw_block .menu .vector-properties .vector-prop-list .row .vector-prop {
     display: table-cell;
     width: 50%
 }
@@ -116,10 +111,20 @@
     padding-right: 5px;
 }
 
+.vectordraw_block .menu .vector-properties .vector-prop-list .row span,
+.vectordraw_block .menu .vector-properties .vector-prop-list .row select,
+.vectordraw_block .menu .vector-properties .vector-prop-list .row input {
+    width: 50%;
+}
+
 .vectordraw_block .menu .vector-properties .vector-prop-list .row select,
 .vectordraw_block .menu .vector-properties .vector-prop-list .row input {
     float: right;
-    width: 50%;
+}
+
+.vectordraw_block .menu .vector-properties .vector-prop-list .row .vector-prop-update .update-error {
+    visibility: hidden;
+    color: #ff0000;
 }
 
 .vectordraw_block .action button {

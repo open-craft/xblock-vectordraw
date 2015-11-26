@@ -712,10 +712,10 @@ class TestVectorDraw(StudioEditableBaseTest):
         # Board should not show point initially
         points = json.loads(params["points"])
         self.check_points(board, points)
-        # Add point (need to do this first since point is selected initially)
-        self.add_point(board, points)
         # Add vector
         self.add_vector(board, vectors)
+        # Add point
+        self.add_point(board, points)
         # Reset
         self.reset(board, vectors, points)
 
@@ -1003,3 +1003,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         vectors[0]["expected_tail_position"] = {'cx': 347, 'cy': 181}
         vectors[0]["expected_tip_position"] = {'cx': 411, 'cy': 117}
         self.check_vectors(board, vectors)
+        # Check error message
+        error_message = self.exercise.find_element_by_css_selector(".update-error");
+        self.wait_until_visible(error_message)
+        self.assertEquals(error_message.text, "Invalid input.")
