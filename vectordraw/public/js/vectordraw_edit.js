@@ -4,11 +4,15 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
     var VectorDraw = function(element_id, settings) {
         this.board = null;
         this.dragged_vector = null;
+        this.selectedVector = null;
         this.drawMode = false;
         this.wasUsed = false;
         this.resultMode = false;
         this.settings = settings;
         this.numberOfVectors = this.settings.vectors.length;
+        this.checks = [
+            'tail', 'tail_x', 'tail_y', 'tip', 'tip_x', 'tip_y', 'coords', 'length', 'angle'
+        ];
         this.element = $('#' + element_id, element);
 
         this.element.on('click', '.controls .add-vector', this.onAddVector.bind(this));
@@ -28,17 +32,10 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         // (without making necessary adjustments in "Expected results" field)
         // discard stale information about expected positions and checks
         var vectorData = JSON.parse(fieldEditor.getContents('vectors')),
-            vectorNames = _.pluck(vectorData, 'name');
-        _.each(_.keys(this.settings.expected_result_positions), function(key) {
-            if (!_.contains(vectorNames, key)) {
-                delete this.settings.expected_result_positions[key];
-            }
-        }, this);
-        _.each(_.keys(this.settings.expected_result), function(key) {
-            if (!_.contains(vectorNames, key)) {
-                delete this.settings.expected_result[key];
-            }
-        }, this);
+            vectorNames = this.getVectorNames(vectorData);
+        var isStale = function(key) { return !_.contains(vectorNames, key); };
+        this.settings.expected_result_positions = _.omit(this.settings.expected_result_positions, isStale);
+        this.settings.expected_result = _.omit(this.settings.expected_result, isStale);
     };
 
     VectorDraw.prototype.render = function() {
@@ -110,6 +107,13 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
             return;
         }
         this.board.create('point', coords, point.style);
+    };
+
+    VectorDraw.prototype.getVectorNames = function(vectorData) {
+        if (vectorData) {
+            return _.pluck(vectorData, 'name');
+        }
+        return _.pluck(this.settings.vectors, 'name');
     };
 
     VectorDraw.prototype.getVectorCoordinates = function(vec) {
@@ -232,26 +236,22 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         var boardObject = this.board.elementsByName[vectorName];
         this.board.removeAncestors(boardObject);
         // 2. Mark vector as "deleted" so it will be removed from "vectors" field on save
-        var vectorSettings = this.getVectorSettingsByName("" + vectorName);
+        var vectorSettings = this.getVectorSettingsByName(String(vectorName));
         vectorSettings.deleted = true;
         // 3. Remove entry that corresponds to selected vector from menu for selecting vector to edit
         var idx = _.indexOf(this.settings.vectors, vectorSettings),
             editOption = this.getEditMenuOption("vector", idx);
         editOption.remove();
-        // 4. Discard information about expected position
-        var expectedPositions = this.settings.expected_result_positions;
-        if (expectedPositions[vectorName]) {
-            delete expectedPositions[vectorName];
-            this.settings.expected_result_positions = expectedPositions;
-        }
-        // 5. Discard information about expected result
-        var expectedResults = this.settings.expected_result;
-        if (expectedResults[vectorName]) {
-            delete expectedResults[vectorName];
-            this.settings.expected_result = expectedResults;
-        }
+        // 4. Discard information about expected position (if any)
+        delete this.settings.expected_result_positions[vectorName];
+        // 5. Discard information about expected result (if any)
+        delete this.settings.expected_result[vectorName];
         // 6. Reset input fields for vector properties to default values
         this.resetVectorProperties();
+        // 7. Reset selected vector
+        this.selectedVector = null;
+        // 8. Hide message about pending changes
+        $('.vector-prop-update .update-pending', element).hide();
     };
 
     VectorDraw.prototype.onEditResult = function(evt) {
@@ -259,6 +259,9 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         this.resultMode = true;
         // Save vector positions
         this.settings.vectors = this.getState();  // Discards vectors that were removed from board
+        // Vector positions saved, so hide message about pending changes
+        this.selectedVector = null;
+        $('.vector-prop-update .update-pending', element).hide();
         // Update vector positions using positions from expected result
         var expectedResultPositions = this.settings.expected_result_positions;
         if (!_.isEmpty(expectedResultPositions)) {
@@ -286,13 +289,17 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         this.resetVectorProperties();
         // Show controls for opting in and out of checks
         $('.checks', element).show();
+        // Disable input fields that users should not be able to interact with unless a vector is selected
+        _.each(['tail', 'length', 'angle'], function(propName) {
+            $('.vector-prop-' + propName + ' input', element).prop('disabled', true);
+        });
     };
 
     VectorDraw.prototype.resetVectorProperties = function(vector) {
         // Select default value
         $('.menu .element-list-edit option[value="-"]', element).attr('selected', true);
         // Reset input fields to default values
-        $('.menu .vector-prop-list input', element).val('-');
+        $('.menu .vector-prop-list input', element).val('');
     };
 
     VectorDraw.prototype.getMouseCoords = function(evt) {
@@ -335,6 +342,12 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         if (angle < 0) {
             angle += 360;
         }
+        // If user selected different vector, hide message about pending changes
+        if (this.selectedVector && vector.name !== this.selectedVector.name) {
+            $('.vector-prop-update .update-pending', element).hide();
+        }
+        // Update selected vector
+        this.selectedVector = vector;
         // Update menu for selecting vector to edit
         this.element.find('.menu .element-list-edit option').attr('selected', false);
         var idx = _.indexOf(this.settings.vectors, vec_settings),
@@ -342,7 +355,7 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         editOption.attr('selected', true);
         // Update properties
         $('.vector-prop-name input', this.element).val(vector.name);
-        $('.vector-prop-label input', this.element).val(vec_settings.style.label || '-');
+        $('.vector-prop-label input', this.element).val(vec_settings.style.label || '');
         $('.vector-prop-angle input', this.element).val(angle.toFixed(2));
         if (vector.elType !== "line") {
             var tailInput = x1.toFixed(2) + ", " + y1.toFixed(2);
@@ -357,14 +370,13 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         else {
             $('.vector-prop-length', this.element).hide();
         }
+        // Enable input fields
+        $('.vector-properties input').prop('disabled', false);
     };
 
     VectorDraw.prototype.updateChecks = function(vector) {
         var expectedResult = this.settings.expected_result[vector.name] || {};
-        var checks = [
-            'tail', 'tail_x', 'tail_y', 'tip', 'tip_x', 'tip_y', 'coords', 'length', 'angle'
-        ];
-        _.each(checks, function(check) {
+        _.each(this.checks, function(check) {
             var checkElement = $('#check-' + check, element);
             // Update checkbox
             if (expectedResult[check]) {
@@ -375,10 +387,10 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
             // Update tolerance
             var tolerance = expectedResult[check + '_tolerance'];
             if (tolerance) {
-                checkElement.find('input[type="text"]').val(tolerance.toFixed(1));
+                checkElement.find('input[type="number"]').val(tolerance.toFixed(1));
             } else {
                 var defaultTolerance = check === 'angle' ? 2.0 : 1.0;
-                checkElement.find('input[type="text"]').val(defaultTolerance.toFixed(1));
+                checkElement.find('input[type="number"]').val(defaultTolerance.toFixed(1));
             }
         });
     };
@@ -400,16 +412,13 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
 
     VectorDraw.prototype.saveChecks = function(vectorName) {
         var expectedResult = {};
-        var checks = [
-            'tail', 'tail_x', 'tail_y', 'tip', 'tip_x', 'tip_y', 'coords', 'length', 'angle'
-        ];
-        _.each(checks, function(check) {
+        _.each(this.checks, function(check) {
             var checkElement = $('#check-' + check, element);
             if (checkElement.find('input[type="checkbox"]').prop('checked')) {
                 // Insert (or update) check: Need current position of selected vector
                 expectedResult[check] = this.settings.expected_result_positions[vectorName][check];
                 // Insert (or update) tolerance
-                var tolerance = checkElement.find('input[type="text"]').val();
+                var tolerance = checkElement.find('input[type="number"]').val();
                 expectedResult[check + '_tolerance'] = parseFloat(tolerance);
             }
         }, this);
@@ -457,7 +466,7 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
 
     VectorDraw.prototype.getDefaultVector = function(coords) {
         this.numberOfVectors += 1;
-        var name = "" + this.numberOfVectors,
+        var name = String(this.numberOfVectors),
             description =  "Vector " + name;
         return {
             name: name,
@@ -504,7 +513,11 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
                 this.dragged_vector.point1.setProperty({fixed: false});
                 this.updateVectorProperties(this.dragged_vector);
                 if (this.resultMode) {
+                    _.each(['name', 'label'], function(propName) {
+                        $('.vector-prop-' + propName + ' input', element).prop('disabled', true);
+                    });
                     this.updateChecks(this.dragged_vector);
+                    $('.checks input', element).prop('disabled', false);
                 }
             }
         }
@@ -536,7 +549,11 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         var vectorObject = this.board.elementsByName[vectorName];
         this.updateVectorProperties(vectorObject);
         if (this.resultMode) {
+            _.each(['name', 'label'], function(propName) {
+                $('.vector-prop-' + propName + ' input', element).prop('disabled', true);
+            });
             this.updateChecks(vectorObject);
+            $('.checks input', element).prop('disabled', false);
         }
     };
 
@@ -544,30 +561,32 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         if (!this.wasUsed) {
             this.wasUsed = true;
         }
+        // About to save changes, so hide message about pending changes
+        $('.vector-prop-update .update-pending', element).hide();
         // Get name of vector that is currently "selected"
-        var vectorName = "" + $('.element-list-edit', element).find('option:selected').data('vector-name');
+        var vectorName = String($('.element-list-edit', element).find('option:selected').data('vector-name')),
+            editableProperties = ['name', 'label', 'tail', 'length', 'angle'],
+            newValues = {};
         // Get values from input fields
-        var newName = $('.vector-prop-name input', element).val(),
-            newLabel = $('.vector-prop-label input', element).val(),
-            newTail = $('.vector-prop-tail input', element).val(),
-            newLength = $('.vector-prop-length input', element).val(),
-            newAngle = $('.vector-prop-angle input', element).val();
-        // Process values
-        newName = $.trim(newName);
-        newLabel = $.trim(newLabel);
-        newTail = _.map(newTail.split(/ *, */), function(coord) {
-            return parseFloat(coord);
+        _.each(editableProperties, function(prop) {
+            newValues[prop] = $.trim($('.vector-prop-' + prop + ' input', element).val());
         });
-        newLength = parseFloat(newLength);
-        newAngle = parseFloat(newAngle);
+        // Process values
+        var newName = newValues.name,
+            newLabel = newValues.label,
+            newTail = _.map(newValues.tail.split(/ *, */), function(coord) { return parseFloat(coord); }),
+            newLength = parseFloat(newValues.length),
+            newAngle = parseFloat(newValues.angle);
         // Validate and update values
-        var vectorSettings = this.getVectorSettingsByName(vectorName),
-            editOption = $('.menu .element-list-edit option[data-vector-name="' + vectorName + '"]', element),
+        var vectorNames = this.getVectorNames(),
+            vectorSettings = this.getVectorSettingsByName(vectorName),
             boardObject = this.board.elementsByName[vectorName];
-        if (newName && newName !== vectorName) {
+        // 1. Update name
+        if (newName && newName !== vectorName && !_.contains(vectorNames, newName)) {
             // Update vector settings
             vectorSettings.name = newName;
             // Update dropdown for selecting vector to edit
+            var editOption = $('.menu .element-list-edit option[data-vector-name="' + vectorName + '"]', element);
             editOption.data('vector-name', newName);
             editOption.text(newName);
             // Update board
@@ -589,14 +608,21 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
                 expectedResults[newName] = expectedResult;
                 delete expectedResults[vectorName];
             }
+        } else {
+            $('.vector-prop-name input', element).val(vectorName);
         }
-        if (newLabel && newLabel !== '-') {
+        // 2. Update label
+        if (newLabel) {
             vectorSettings.style.label = newLabel;
             boardObject.point2.name = newLabel;  // Always prefer label for labeling vector on board
+        } else {
+            vectorSettings.style.label = null;
+            boardObject.point2.name = newName || vectorName;  // ... but fall back on name if label was removed
         }
+        // 3. Update tail, length, angle
         var values = [newTail[0], newTail[1], newLength, newAngle];
         if (!_.some(values, Number.isNaN)) {
-            $('.vector-prop-update .update-error', element).css('visibility', 'hidden');
+            $('.vector-prop-update .update-error', element).hide();
             // Use coordinates of new tail, new length, new angle to calculate new position of tip
             var radians = newAngle * Math.PI / 180;
             var newTip = [
@@ -616,7 +642,7 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
                 this.saveChecks(vectorName);
             }
         } else {
-            $('.vector-prop-update .update-error', element).css('visibility', 'visible');
+            $('.vector-prop-update .update-error', element).show();
         }
     };
 
@@ -665,29 +691,30 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
     // Set up click handlers
     $('.save-button', element).on('click', function(e) {
         e.preventDefault();
-        var data;
-        if (vectordraw.resultMode) {  // Author edited both initial state and result
-            data = {
-                vectors: vectordraw.settings.vectors,  // Corresponds to state vectors were in
-                                                       // when author switched to result mode
-                expected_result_positions: vectordraw.settings.expected_result_positions,
-                expected_result: vectordraw.settings.expected_result
-            };
-        } else if (vectordraw.wasUsed) {  // Author edited initial state
-            var state = vectordraw.getState();
-            data = {
-                vectors: state,
-                expected_result_positions: vectordraw.settings.expected_result_positions,
-                expected_result: vectordraw.settings.expected_result
-            };
-        } else {  // Author did not use WYSIWYG editor
-            data = {};
+        var data = {};
+        if (vectordraw.wasUsed) {
+            // If author edited both initial state and result,
+            // vectordraw.settings.vectors corresponds to state vectors were in
+            // when author switched to result mode
+            data.vectors = vectordraw.resultMode ? vectordraw.settings.vectors : vectordraw.getState();
+            data.expected_result_positions = vectordraw.settings.expected_result_positions;
+            data.expected_result = vectordraw.settings.expected_result;
         }
         fieldEditor.save(data);
     });
+
     $('.cancel-button', element).on('click', function(e) {
         e.preventDefault();
         fieldEditor.cancel();
     });
 
+    $('.info-button', element).on('click', function(e) {
+        e.preventDefault();
+        $('#wysiwyg-description', element).toggle();
+    });
+
+    $('input', element).on('change', function(e) {
+        $('.update-error').hide();
+        $('.update-pending').show();
+    });
 }

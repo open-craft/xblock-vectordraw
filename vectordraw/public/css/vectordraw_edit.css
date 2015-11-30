@@ -14,6 +14,10 @@
     margin-bottom: 1em;
 }
 
+.vectordraw_edit_block #wysiwyg-description {
+    display: none;
+}
+
 .vectordraw_edit_block p {
     margin-bottom: 1em;
     font-size: 0.9em;
@@ -59,6 +63,11 @@
     float: right;
 }
 
+.vectordraw_block .menu .vector-properties .vector-prop-list .row .vector-prop-update .update-pending {
+    display: none;
+    color: #ffa500;
+}
+
 .vectordraw_edit_block h3 {
     margin-top: 5px;
     margin-bottom: 5px;
@@ -83,9 +92,14 @@
 }
 
 .vectordraw_edit_block .checks .check span,
-.vectordraw_edit_block .checks .check input[type="text"] {
+.vectordraw_edit_block .checks .check input[type="number"] {
     height: 1.5em;
+    min-width: 0px;
     margin-right: 12px;
+}
+
+.vectordraw_edit_block .checks .check input[type="number"] {
+    padding: 0 0 0 5px;
 }
 
 .vectordraw_edit_block .checks .check input[type="checkbox"] {

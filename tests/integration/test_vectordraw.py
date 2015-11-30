@@ -105,20 +105,33 @@ class TestVectorDraw(StudioEditableBaseTest):
 
     def check_vector_properties(
             self, menu, is_present=False, expected_label="Vector Properties",
-            expected_name=None, expected_tail=None, expected_length=None, expected_angle=None
+            expected_name=None, expected_tail=None, expected_length=None, expected_angle=None,
+            input_fields_disabled=True
     ):
         if is_present:
             vector_properties = menu.find_element_by_css_selector(".vector-properties")
             vector_properties_label = vector_properties.find_element_by_css_selector("h3")
             self.assertEquals(vector_properties_label.text, expected_label)
             # Name
-            self.check_vector_property(vector_properties, "name", "select", "name:", expected_name or "-")
+            self.check_vector_property(
+                vector_properties, "name", "select", "name:", expected_name or "-",
+                field_disabled=input_fields_disabled
+            )
             # Tail
-            self.check_vector_property(vector_properties, "tail", "input", "tail position:", expected_tail or "-")
+            self.check_vector_property(
+                vector_properties, "tail", "input", "tail position:", expected_tail or "",
+                field_disabled=input_fields_disabled
+            )
             # Length
-            self.check_vector_property(vector_properties, "length", "input", "length:", expected_length or "-")
+            self.check_vector_property(
+                vector_properties, "length", "input", "length:", expected_length or "",
+                field_disabled=input_fields_disabled
+            )
             # Angle
-            self.check_vector_property(vector_properties, "angle", "input", "angle:", expected_angle or "-")
+            self.check_vector_property(
+                vector_properties, "angle", "input", "angle:", expected_angle or "",
+                field_disabled=input_fields_disabled
+            )
             # Slope
             vector_slope = vector_properties.find_element_by_css_selector(".vector-prop-slope")
             self.assertFalse(vector_slope.is_displayed())
@@ -130,7 +143,8 @@ class TestVectorDraw(StudioEditableBaseTest):
             )
 
     def check_vector_property(
-            self, vector_properties, property_name, input_type, expected_label, expected_value=None
+            self, vector_properties, property_name, input_type, expected_label, expected_value=None,
+            field_disabled=False
     ):
         vector_property = vector_properties.find_element_by_css_selector(
             ".vector-prop-{}".format(property_name)
@@ -145,6 +159,8 @@ class TestVectorDraw(StudioEditableBaseTest):
         )
         if input_type == "input":
             self.assertEquals(vector_property_input.get_attribute("value"), expected_value)
+            disabled = vector_property_input.get_attribute("disabled")
+            self.assertEquals(bool(disabled), field_disabled)
         else:
             selected_option = vector_property_input.find_element_by_css_selector('option[selected="selected"]')
             self.assertEquals(selected_option.text, expected_value)
@@ -297,7 +313,8 @@ class TestVectorDraw(StudioEditableBaseTest):
         # "Vector Properties" should display correct info
         self.check_vector_properties(
             menu, is_present=True, expected_label="Custom properties label",
-            expected_name="N", expected_tail="2.00, 2.00", expected_length="4.00", expected_angle="45.00"
+            expected_name="N", expected_tail="2.00, 2.00", expected_length="4.00", expected_angle="45.00",
+            input_fields_disabled=False
         )
         self.check_edit_dropdown(menu, vectors)
 
@@ -330,7 +347,8 @@ class TestVectorDraw(StudioEditableBaseTest):
         # "Vector Properties" should display correct info
         self.check_vector_properties(
             menu, is_present=True, expected_label="Custom properties label",
-            expected_name="N", expected_tail="2.00, 2.00", expected_length="4.00", expected_angle="45.00"
+            expected_name="N", expected_tail="2.00, 2.00", expected_length="4.00", expected_angle="45.00",
+            input_fields_disabled=False
         )
 
     def reset(self, board, vectors, points):
@@ -552,7 +570,8 @@ class TestVectorDraw(StudioEditableBaseTest):
         menu = self.exercise.find_element_by_css_selector(".menu")
         self.check_vector_properties(
             menu, is_present=True, expected_label="Custom properties label",
-            expected_name="N", expected_tail="2.00, 2.00", expected_length="4.00", expected_angle="45.00"
+            expected_name="N", expected_tail="2.00, 2.00", expected_length="4.00", expected_angle="45.00",
+            input_fields_disabled=False
         )
 
     @data(

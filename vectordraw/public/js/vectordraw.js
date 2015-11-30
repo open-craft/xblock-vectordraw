@@ -367,6 +367,10 @@ function VectorDrawXBlock(runtime, element, init_args) {
                 $('.vector-prop-slope input', this.element).val(slope.toFixed(2));
             }
         }
+        // Enable input fields
+        $('.vector-properties input').prop('disabled', false);
+        // Hide error message
+        $('.vector-prop-update .update-error', element).hide();
     };
 
     VectorDraw.prototype.resetVectorProperties = function(vector) {
@@ -374,8 +378,8 @@ function VectorDrawXBlock(runtime, element, init_args) {
         this.element.find('.menu .element-list-edit option').attr('selected', false);
         // Select default value
         $('.menu .element-list-edit option[value="-"]', element).attr('selected', true);
-        // Reset input fields to default values
-        $('.menu .vector-prop-list input', element).val('-');
+        // Reset input fields to default values and disable them
+        $('.menu .vector-prop-list input', element).prop('disabled', true).val('');
     };
 
     VectorDraw.prototype.isVectorTailDraggable = function(vector) {
@@ -478,7 +482,7 @@ function VectorDrawXBlock(runtime, element, init_args) {
         var values = [newTail[0], newTail[1], newLength, newAngle];
         // Validate values
         if (!_.some(values, Number.isNaN)) {
-            $('.vector-prop-update .update-error', element).css('visibility', 'hidden');
+            $('.vector-prop-update .update-error', element).hide();
             // Use coordinates of new tail, new length, new angle to calculate new position of tip
             var radians = newAngle * Math.PI / 180;
             var newTip = [
@@ -491,7 +495,7 @@ function VectorDrawXBlock(runtime, element, init_args) {
             board_object.point2.setPosition(JXG.COORDS_BY_USER, newTip);
             this.board.update();
         } else {
-            $('.vector-prop-update .update-error', element).css('visibility', 'visible');
+            $('.vector-prop-update .update-error', element).show();
         }
     };
 
