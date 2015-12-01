@@ -10,6 +10,7 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         this.resultMode = false;
         this.settings = settings;
         this.numberOfVectors = this.settings.vectors.length;
+        this.editableProperties = ['name', 'label', 'tail', 'length', 'angle'];
         this.checks = [
             'tail', 'tail_x', 'tail_y', 'tip', 'tip_x', 'tip_y', 'coords', 'length', 'angle'
         ];
@@ -212,18 +213,18 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
     };
 
     VectorDraw.prototype.addEditMenuOption = function(vectorName, idx) {
-        // 1. Find dropdown for selecting vector to edit
+        // Find dropdown for selecting vector to edit
         var editMenu = this.element.find('.menu .element-list-edit');
-        // 2. Remove current selection(s)
+        // Remove current selection(s)
         editMenu.find('option').attr('selected', false);
-        // 3. Create option for newly added vector
+        // Create option for newly added vector
         var newOption = $('<option>')
             .attr('value', 'vector-' + idx)
             .attr('data-vector-name', vectorName)
             .text(vectorName);
-        // 4. Append option to dropdown
+        // Append option to dropdown
         editMenu.append(newOption);
-        // 5. Select newly added option
+        // Select newly added option
         newOption.attr('selected', true);
     };
 
@@ -231,26 +232,26 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         if (!this.wasUsed) {
             this.wasUsed = true;
         }
-        // 1. Remove selected vector from board
+        // Remove selected vector from board
         var vectorName = $('.element-list-edit', element).find('option:selected').data('vector-name');
         var boardObject = this.board.elementsByName[vectorName];
         this.board.removeAncestors(boardObject);
-        // 2. Mark vector as "deleted" so it will be removed from "vectors" field on save
+        // Mark vector as "deleted" so it will be removed from "vectors" field on save
         var vectorSettings = this.getVectorSettingsByName(String(vectorName));
         vectorSettings.deleted = true;
-        // 3. Remove entry that corresponds to selected vector from menu for selecting vector to edit
+        // Remove entry that corresponds to selected vector from menu for selecting vector to edit
         var idx = _.indexOf(this.settings.vectors, vectorSettings),
             editOption = this.getEditMenuOption("vector", idx);
         editOption.remove();
-        // 4. Discard information about expected position (if any)
+        // Discard information about expected position (if any)
         delete this.settings.expected_result_positions[vectorName];
-        // 5. Discard information about expected result (if any)
+        // Discard information about expected result (if any)
         delete this.settings.expected_result[vectorName];
-        // 6. Reset input fields for vector properties to default values
+        // Reset input fields for vector properties to default values
         this.resetVectorProperties();
-        // 7. Reset selected vector
+        // Reset selected vector
         this.selectedVector = null;
-        // 8. Hide message about pending changes
+        // Hide message about pending changes
         $('.vector-prop-update .update-pending', element).hide();
     };
 
@@ -265,7 +266,6 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         // Update vector positions using positions from expected result
         var expectedResultPositions = this.settings.expected_result_positions;
         if (!_.isEmpty(expectedResultPositions)) {
-            // Loop over vectors and update their positions based on expected result positions
             _.each(this.settings.vectors, function(vec) {
                 var vectorName = vec.name,
                     resultPosition = expectedResultPositions[vectorName];
@@ -279,27 +279,26 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
             }, this);
             this.board.update();
         }
-        // Hide or disable operations that are specific to defining initial state
-        $(evt.currentTarget).prop('disabled', true);
+        // Hide or disable buttons for operations that are specific to defining initial state
+        $(evt.currentTarget).addClass('disabled').prop('disabled', true);
         $('.add-vector', element).css('visibility', 'hidden');
-        $('.vector-prop-name input', element).prop('disabled', true);
-        $('.vector-prop-label input', element).prop('disabled', true);
         $('.vector-remove button').hide();
         // Reset vector properties to ensure a clean slate
         this.resetVectorProperties();
         // Show controls for opting in and out of checks
         $('.checks', element).show();
-        // Disable input fields that users should not be able to interact with unless a vector is selected
-        _.each(['tail', 'length', 'angle'], function(propName) {
-            $('.vector-prop-' + propName + ' input', element).prop('disabled', true);
-        });
     };
 
     VectorDraw.prototype.resetVectorProperties = function(vector) {
-        // Select default value
-        $('.menu .element-list-edit option[value="-"]', element).attr('selected', true);
-        // Reset input fields to default values
-        $('.menu .vector-prop-list input', element).val('');
+        // Reset dropdown for selecting vector to default value
+        $('.element-list-edit option[value="-"]', element).attr('selected', true);
+        // Reset input fields and disable them
+        // (users should not be able to interact with them unless a vector is selected)
+        _.each(this.editableProperties, function(propName) {
+            $('.vector-prop-' + propName + ' input', element).prop('disabled', true).val('');
+        });
+        // Disable buttons
+        $('.vector-properties button').addClass('disabled').prop('disabled', true);
     };
 
     VectorDraw.prototype.getMouseCoords = function(evt) {
@@ -372,6 +371,8 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         }
         // Enable input fields
         $('.vector-properties input').prop('disabled', false);
+        // Enable buttons
+        $('.vector-properties button').removeClass('disabled').prop('disabled', false);
     };
 
     VectorDraw.prototype.updateChecks = function(vector) {
@@ -565,10 +566,9 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         $('.vector-prop-update .update-pending', element).hide();
         // Get name of vector that is currently "selected"
         var vectorName = String($('.element-list-edit', element).find('option:selected').data('vector-name')),
-            editableProperties = ['name', 'label', 'tail', 'length', 'angle'],
             newValues = {};
         // Get values from input fields
-        _.each(editableProperties, function(prop) {
+        _.each(this.editableProperties, function(prop) {
             newValues[prop] = $.trim($('.vector-prop-' + prop + ' input', element).val());
         });
         // Process values

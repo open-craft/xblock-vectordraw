@@ -369,17 +369,19 @@ function VectorDrawXBlock(runtime, element, init_args) {
         }
         // Enable input fields
         $('.vector-properties input').prop('disabled', false);
+        // Enable buttons
+        $('.vector-properties button').removeClass('disabled').prop('disabled', false);
         // Hide error message
         $('.vector-prop-update .update-error', element).hide();
     };
 
     VectorDraw.prototype.resetVectorProperties = function(vector) {
-        // Clear current selection
-        this.element.find('.menu .element-list-edit option').attr('selected', false);
-        // Select default value
+        // Reset dropdown for selecting vector to default value
         $('.menu .element-list-edit option[value="-"]', element).attr('selected', true);
         // Reset input fields to default values and disable them
         $('.menu .vector-prop-list input', element).prop('disabled', true).val('');
+        // Disable "Update" button
+        $('.vector-properties button').addClass('disabled').prop('disabled', true);
     };
 
     VectorDraw.prototype.isVectorTailDraggable = function(vector) {

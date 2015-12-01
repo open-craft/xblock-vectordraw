@@ -135,6 +135,10 @@ class TestVectorDraw(StudioEditableBaseTest):
             # Slope
             vector_slope = vector_properties.find_element_by_css_selector(".vector-prop-slope")
             self.assertFalse(vector_slope.is_displayed())
+            # "Update" button
+            update_button = vector_properties.find_element_by_css_selector('button.update')
+            update_button_disabled = update_button.get_attribute('disabled')
+            self.assertEquals(bool(update_button_disabled), input_fields_disabled)
         else:
             self.assert_not_present(
                 menu,
