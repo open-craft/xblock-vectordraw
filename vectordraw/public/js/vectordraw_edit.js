@@ -280,7 +280,7 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
             this.board.update();
         }
         // Hide or disable buttons for operations that are specific to defining initial state
-        $(evt.currentTarget).addClass('disabled').prop('disabled', true);
+        $(evt.currentTarget).prop('disabled', true);
         $('.add-vector', element).css('visibility', 'hidden');
         $('.vector-remove button').hide();
         // Reset vector properties to ensure a clean slate
@@ -298,7 +298,7 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
             $('.vector-prop-' + propName + ' input', element).prop('disabled', true).val('');
         });
         // Disable buttons
-        $('.vector-properties button').addClass('disabled').prop('disabled', true);
+        $('.vector-properties button').prop('disabled', true);
     };
 
     VectorDraw.prototype.getMouseCoords = function(evt) {
@@ -372,7 +372,7 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         // Enable input fields
         $('.vector-properties input').prop('disabled', false);
         // Enable buttons
-        $('.vector-properties button').removeClass('disabled').prop('disabled', false);
+        $('.vector-properties button').prop('disabled', false);
     };
 
     VectorDraw.prototype.updateChecks = function(vector) {
