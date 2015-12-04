@@ -1,5 +1,33 @@
 """
 This module contains grading logic for Vector Drawing exercises.
+
+It uses the following data structures:
+
+- `vectors`: A dictionary of Vector objects.
+
+   Keys are vector names and values represent individual vectors that were present
+   on the drawing board when the student submitted an answer by clicking the 'Check' button.
+
+- `points`: A dictionary of Point objects.
+
+   Keys are point names and values represent individual points that were present
+   on the drawing board when the student submitted an answer by clicking the 'Check' button.
+
+- `check`: A dictionary representing a specific check.
+
+   Contains the name of the check itself (e.g., 'presence', 'coords', 'angle'),
+   the name of the element on which to perform the check, as well as
+   the expected value of the property being checked.
+   Optionally contains information about tolerance to apply when performing the check,
+   and/or a custom error message to present to the user if the check fails.
+
+- `answer`: A dictionary representing a specific answer submitted by a student.
+
+   Contains three entries: vectors, points, and checks. The first two (vectors, points)
+   provide information about vectors and points present on the drawing board
+   when the answer was submitted. The third one (checks) specifies the checks
+   to perform for individual vectors and points.
+
 """
 
 # pylint: disable=invalid-name
@@ -52,28 +80,36 @@ def check_presence(check, vectors):
         return errmsg.format(name=check['vector'])
 
 
-def check_tail(check, vectors):
+def _check_vector_endpoint(check, vectors, endpoint):
     """
-    Check if tail of vector targeted by `check` is in correct position.
+    Check if `endpoint` (tail or tip) of vector targeted by `check` is in correct position.
     """
     vec = vectors[check['vector']]
     tolerance = check.get('tolerance', 1.0)
     expected = check['expected']
-    dist = math.hypot(expected[0] - vec.tail.x, expected[1] - vec.tail.y)
+    verb = 'start' if endpoint == 'tail' else 'end'
+    endpoint = getattr(vec, endpoint)
+    dist = math.hypot(expected[0] - endpoint.x, expected[1] - endpoint.y)
     if dist > tolerance:
-        return _errmsg('Vector {name} does not start at correct point.', check, vectors)
+        return _errmsg(
+            'Vector {name} does not {verb} at correct point.'.format(name='{name}', verb=verb),
+            check,
+            vectors
+        )
+
+
+def check_tail(check, vectors):
+    """
+    Check if tail of vector targeted by `check` is in correct position.
+    """
+    return _check_vector_endpoint(check, vectors, endpoint='tail')
 
 
 def check_tip(check, vectors):
     """
     Check if tip of vector targeted by `check` is in correct position.
     """
-    vec = vectors[check['vector']]
-    tolerance = check.get('tolerance', 1.0)
-    expected = check['expected']
-    dist = math.hypot(expected[0] - vec.tip.x, expected[1] - vec.tip.y)
-    if dist > tolerance:
-        return _errmsg('Vector {name} does not end at correct point.', check, vectors)
+    return _check_vector_endpoint(check, vectors, endpoint='tip')
 
 
 def _check_coordinate(check, coord):
@@ -235,7 +271,7 @@ def check_points_on_line(check, vectors):
     """
     line = vectors[check['vector']]
     tolerance = check.get('tolerance', 1.0)
-    points = check.get('expected')
+    points = check['expected']
     for point in points:
         point = Point(point[0], point[1])
         if _dist_line_point(line, point) > tolerance:
@@ -250,7 +286,7 @@ def check_point_coords(check, points):
     """
     point = points[check['point']]
     tolerance = check.get('tolerance', 1.0)
-    expected = check.get('expected')
+    expected = check['expected']
     dist = math.hypot(expected[0] - point.x, expected[1] - point.y)
     if dist > tolerance:
         return _errmsg_point('Point {name} is not at the correct location.', check, point)

@@ -18,6 +18,7 @@ except ImportError:
     WorkbenchRuntime = False  # pylint: disable=invalid-name
 
 from .grader import Grader
+from .utils import get_doc_link
 
 
 loader = ResourceLoader(__name__)  # pylint: disable=invalid-name
@@ -151,10 +152,11 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
             "List of vectors to use for the exercise. "
             "You must specify it as an array of entries "
             "where each entry represents an individual vector. "
+            "See {doc_link} for more information. "
             "Note that you can also use the WYSIWYG editor below to create or modify vectors. "
             "If you do, any changes you make here will be overwritten by vector data "
             "from the WYSIWYG editor when saving."
-        ),
+        ).format(doc_link=get_doc_link('vectors')),
         default="[]",
         multiline_editor=True,
         resettable_editor=False,
@@ -166,8 +168,9 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         help=(
             "List of points to be drawn on the board for reference, or to be placed by the student."
             "You must specify it as an array of entries "
-            "where each entry represents an individual point."
-        ),
+            "where each entry represents an individual point. "
+            "See {doc_link} for more information."
+        ).format(doc_link=get_doc_link('points')),
         default="[]",
         multiline_editor=True,
         resettable_editor=False,
@@ -178,12 +181,16 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         display_name="Expected result",
         help=(
             "Defines vector properties for grading. "
+            "You must specify it as a JSON object where each key is the name of an existing vector "
+            "and each value is a JSON object containing information about checks to perform "
+            "and expected values. "
+            "See {doc_link} for more information. "
             "Vectors omitted from this setting are ignored when grading. "
             "Note that you can also use the WYSIWYG editor below to opt in and out of checks "
             "for individual vectors. "
             "If you use the WYSIWYG editor at all, any changes you make here "
             "will be overwritten when saving."
-        ),
+        ).format(doc_link=get_doc_link('expected_result')),
         default="{}",
         multiline_editor=True,
         resettable_editor=False,
@@ -328,9 +335,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         for vector in json.loads(self.vectors):
             default_vector = self._get_default_vector()
             default_vector_style = default_vector['style']
-            if 'style' in vector:
-                default_vector_style.update(vector['style'])
-                del vector['style']
+            default_vector_style.update(vector.pop('style', {}))
             default_vector.update(vector)
             vectors.append(default_vector)
         return vectors
@@ -362,9 +367,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         for point in json.loads(self.points):
             default_point = self._get_default_point()
             default_point_style = default_point['style']
-            if 'style' in point:
-                default_point_style.update(point['style'])
-                del point['style']
+            default_point_style.update(point.pop('style', {}))
             default_point.update(point)
             default_point_style['name'] = default_point['name']
             default_point_style['fixed'] = default_point['fixed']

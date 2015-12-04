@@ -43,7 +43,7 @@
                         aria-describedby="{{field.name}}-help"
                         rows=10 cols=70>{{field.value}}</textarea>
             {% else %}
-              Unsupported field type. This setting cannot be edited.
+              {% trans "Unsupported field type. This setting cannot be edited." %}
             {% endif %}
 
             {% if field.allow_reset %}
@@ -57,7 +57,7 @@
             {% endif %}
           </div>
           {% if field.help %}
-            <span id="{{field.name}}-help" class="tip setting-help"> {{ field.help }} </span>
+            <span id="{{field.name}}-help" class="tip setting-help"> {{ field.help|safe }} </span>
           {% endif %}
         </li>
       {% endfor %}
