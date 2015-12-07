@@ -77,7 +77,7 @@ def check_presence(check, vectors):
     """
     if check['vector'] not in vectors:
         errmsg = check.get('errmsg', 'You need to use the {name} vector.')
-        return errmsg.format(name=check['vector'])
+        raise ValueError(errmsg.format(name=check['vector']))
 
 
 def _check_vector_endpoint(check, vectors, endpoint):
@@ -91,11 +91,11 @@ def _check_vector_endpoint(check, vectors, endpoint):
     endpoint = getattr(vec, endpoint)
     dist = math.hypot(expected[0] - endpoint.x, expected[1] - endpoint.y)
     if dist > tolerance:
-        return _errmsg(
+        raise ValueError(_errmsg(
             'Vector {name} does not {verb} at correct point.'.format(name='{name}', verb=verb),
             check,
             vectors
-        )
+        ))
 
 
 def check_tail(check, vectors):
@@ -127,7 +127,7 @@ def check_tail_x(check, vectors):
     """
     vec = vectors[check['vector']]
     if _check_coordinate(check, vec.tail.x):
-        return _errmsg('Vector {name} does not start at correct point.', check, vectors)
+        raise ValueError(_errmsg('Vector {name} does not start at correct point.', check, vectors))
 
 
 def check_tail_y(check, vectors):
@@ -136,7 +136,7 @@ def check_tail_y(check, vectors):
     """
     vec = vectors[check['vector']]
     if _check_coordinate(check, vec.tail.y):
-        return _errmsg('Vector {name} does not start at correct point.', check, vectors)
+        raise ValueError(_errmsg('Vector {name} does not start at correct point.', check, vectors))
 
 
 def check_tip_x(check, vectors):
@@ -145,7 +145,7 @@ def check_tip_x(check, vectors):
     """
     vec = vectors[check['vector']]
     if _check_coordinate(check, vec.tip.x):
-        return _errmsg('Vector {name} does not end at correct point.', check, vectors)
+        raise ValueError(_errmsg('Vector {name} does not end at correct point.', check, vectors))
 
 
 def check_tip_y(check, vectors):
@@ -154,7 +154,7 @@ def check_tip_y(check, vectors):
     """
     vec = vectors[check['vector']]
     if _check_coordinate(check, vec.tip.y):
-        return _errmsg('Vector {name} does not end at correct point.', check, vectors)
+        raise ValueError(_errmsg('Vector {name} does not end at correct point.', check, vectors))
 
 
 def _coord_delta(expected, actual):
@@ -187,7 +187,7 @@ def check_coords(check, vectors):
     expected = check['expected']
     tolerance = check.get('tolerance', 1.0)
     if not _coords_within_tolerance(vec, expected, tolerance):
-        return _errmsg('Vector {name} coordinates are not correct.', check, vectors)
+        raise ValueError(_errmsg('Vector {name} coordinates are not correct.', check, vectors))
 
 
 def check_segment_coords(check, vectors):
@@ -199,7 +199,7 @@ def check_segment_coords(check, vectors):
     tolerance = check.get('tolerance', 1.0)
     if not (_coords_within_tolerance(vec, expected, tolerance) or
             _coords_within_tolerance(vec.opposite(), expected, tolerance)):
-        return _errmsg('Segment {name} coordinates are not correct.', check, vectors)
+        raise ValueError(_errmsg('Segment {name} coordinates are not correct.', check, vectors))
 
 
 def check_length(check, vectors):
@@ -209,9 +209,9 @@ def check_length(check, vectors):
     vec = vectors[check['vector']]
     tolerance = check.get('tolerance', 1.0)
     if abs(vec.length - check['expected']) > tolerance:
-        return _errmsg(
+        raise ValueError(_errmsg(
             'The length of {name} is incorrect. Your length: {length:.1f}', check, vectors
-        )
+        ))
 
 
 def _angle_within_tolerance(vec, expected, tolerance):
@@ -236,7 +236,9 @@ def check_angle(check, vectors):
     tolerance = check.get('tolerance', 2.0)
     expected = math.radians(check['expected'])
     if not _angle_within_tolerance(vec, expected, tolerance):
-        return _errmsg('The angle of {name} is incorrect. Your angle: {angle:.1f}', check, vectors)
+        raise ValueError(
+            _errmsg('The angle of {name} is incorrect. Your angle: {angle:.1f}', check, vectors)
+        )
 
 
 def check_segment_angle(check, vectors):
@@ -250,7 +252,9 @@ def check_segment_angle(check, vectors):
     expected = math.radians(check['expected'])
     if not (_angle_within_tolerance(vec, expected, tolerance) or
             _angle_within_tolerance(vec.opposite(), expected, tolerance)):
-        return _errmsg('The angle of {name} is incorrect. Your angle: {angle:.1f}', check, vectors)
+        raise ValueError(
+            _errmsg('The angle of {name} is incorrect. Your angle: {angle:.1f}', check, vectors)
+        )
 
 
 def _dist_line_point(line, point):
@@ -275,9 +279,9 @@ def check_points_on_line(check, vectors):
     for point in points:
         point = Point(point[0], point[1])
         if _dist_line_point(line, point) > tolerance:
-            return _errmsg(
+            raise ValueError(_errmsg(
                 'The line {name} does not pass through the correct points.', check, vectors
-            )
+            ))
 
 
 def check_point_coords(check, points):
@@ -358,10 +362,11 @@ class Grader(object):
             check_data['check'] = check
             check_fn = self.check_registry[check['check']]
             args = [check_data[arg] for arg in inspect.getargspec(check_fn).args]
-            result = check_fn(*args)
-            if result:
-                return {'ok': False, 'msg': result}
-        return {'ok': True, 'msg': self.success_message}
+            try:
+                check_fn(*args)
+            except ValueError as e:
+                return {'correct': False, 'msg': e.message}
+        return {'correct': True, 'msg': self.success_message}
 
     def _get_vectors(self, answer):  # pylint: disable=no-self-use
         """

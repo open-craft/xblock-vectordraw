@@ -4,7 +4,7 @@ function StudioEditableXBlockMixin(runtime, element) {
 
     var fields = [];
     var tinyMceAvailable = (typeof $.fn.tinymce !== 'undefined'); // Studio includes a copy of tinyMCE and its jQuery plugin
-    var errorMessage = gettext("This may be happening because of an error with our server or your internet connection. Try refreshing the page or making sure you are online.");
+    var errorMessage = gettext("This may be happening because of an error with our server or your internet connection. Make sure you are online, and try refreshing the page.");
 
     $(element).find('.field-data-control').each(function() {
         var $field = $(this);
@@ -18,11 +18,11 @@ function StudioEditableXBlockMixin(runtime, element) {
             val: function() {
                 var val = $field.val();
                 // Cast values to the appropriate type so that we send nice clean JSON over the wire:
-                if (type == 'boolean')
-                    return (val == 'true' || val == '1');
-                if (type == "integer")
+                if (type === 'boolean')
+                    return (val === 'true' || val === '1');
+                if (type === "integer")
                     return parseInt(val, 10);
-                if (type == "float")
+                if (type === "float")
                     return parseFloat(val);
                 return val;
             },
@@ -41,7 +41,7 @@ function StudioEditableXBlockMixin(runtime, element) {
             $wrapper.removeClass('is-set');
             $resetButton.removeClass('active').addClass('inactive');
         });
-        if (type == 'html' && tinyMceAvailable) {
+        if (type === 'html' && tinyMceAvailable) {
             tinyMCE.baseURL = baseUrl + "/js/vendor/tinymce/js/tinymce";
             $field.tinymce({
                 theme: 'modern',
@@ -72,16 +72,17 @@ function StudioEditableXBlockMixin(runtime, element) {
             url: handlerUrl,
             data: JSON.stringify(data),
             dataType: "json",
-            global: false  // Disable Studio's error handling that conflicts with studio's notify('save') and notify('cancel') :-/
+            notifyOnError: false
         }).done(function(response) {
             runtime.notify('save', {state: 'end'});
         }).fail(function(jqXHR) {
             if (jqXHR.responseText) { // Is there a more specific error message we can show?
                 try {
                     errorMessage = JSON.parse(jqXHR.responseText).error;
-                    if (typeof errorMessage === "object" && errorMessage.messages) {
+                    if (_.isObject(errorMessage) && errorMessage.messages) {
                         // e.g. {"error": {"messages": [{"text": "Unknown user 'bob'!", "type": "error"}, ...]}} etc.
-                        errorMessage = $.map(errorMessage.messages, function(msg) { return msg.text; }).join(", ");
+                        var errorMessages = _.pluck(errorMessage.messages, "text");
+                        errorMessage = errorMessages.join(", ");
                     }
                 } catch (error) { errorMessage = jqXHR.responseText.substr(0, 300); }
             }
@@ -98,8 +99,7 @@ function StudioEditableXBlockMixin(runtime, element) {
         save: function(data) {
             var values = {};
             var notSet = []; // List of field names that should be set to default values
-            for (var i in fields) {
-                var field = fields[i];
+            _.each(fields, function(field) {
                 if (field.isSet()) {
                     values[field.name] = field.val();
                 } else {
@@ -110,7 +110,7 @@ function StudioEditableXBlockMixin(runtime, element) {
                 if (field.hasEditor()) {
                     field.removeEditor();
                 }
-            }
+            });
             // If WYSIWYG editor was used,
             // prefer its data over values of "Vectors" and "Expected result" fields:
             if (!_.isEmpty(data)) {
@@ -125,12 +125,11 @@ function StudioEditableXBlockMixin(runtime, element) {
         cancel: function() {
             // Remove TinyMCE instances to make sure jQuery does not try to access stale instances
             // when loading editor for another block:
-            for (var i in fields) {
-                var field = fields[i];
+            _.each(fields, function(field) {
                 if (field.hasEditor()) {
                     field.removeEditor();
                 }
-            }
+            });
             runtime.notify('cancel', {});
         }
 

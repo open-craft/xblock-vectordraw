@@ -29,11 +29,11 @@ class TestVectorDraw(StudioEditableBaseTest):
         else:
             self.fail(errmsg)
 
-    def check_hidden_text(self, selector, expected_text):
+    def assert_hidden_text(self, selector, expected_text):
         hidden_text = self.browser.execute_script("return $('{}').text();".format(selector))
         self.assertEquals(hidden_text, expected_text)
 
-    def check_title_and_description(self, expected_title="Vector Drawing", expected_description=None):
+    def assert_title_and_description(self, expected_title="Vector Drawing", expected_description=None):
         title = self.exercise.find_element_by_css_selector("h2")
         self.assertEquals(title.text, expected_title)
         if expected_description:
@@ -46,18 +46,18 @@ class TestVectorDraw(StudioEditableBaseTest):
                 "Description element present even though no description has been set by user."
             )
 
-    def check_dimensions(self, board, expected_width="550px", expected_height="400px"):
+    def assert_dimensions(self, board, expected_width="550px", expected_height="400px"):
         width = board.value_of_css_property("width")
         height = board.value_of_css_property("height")
         self.assertEquals(width, expected_width)
         self.assertEquals(height, expected_height)
 
-    def check_axis(self, board, is_present=False):
+    def assert_axis(self, board, is_present=False):
         text_elements = board.find_elements_by_css_selector(".JXGtext")
         ticks = any("ticks" in text_element.get_attribute("id") for text_element in text_elements)
         self.assertEquals(ticks, is_present)
 
-    def check_navigation_bar(self, board, is_present=False):
+    def assert_navigation_bar(self, board, is_present=False):
         if is_present:
             navigation_bar = board.find_element_by_css_selector("#jxgboard1_navigationbar")
             self.assertTrue(navigation_bar.is_displayed())
@@ -68,7 +68,7 @@ class TestVectorDraw(StudioEditableBaseTest):
                 "Navigation bar should be hidden by default."
             )
 
-    def check_background(self, board, is_present=False):
+    def assert_background(self, board, is_present=False):
         if is_present:
             background = board.find_element_by_css_selector("image")
             self.assertTrue(background.is_displayed())
@@ -83,7 +83,7 @@ class TestVectorDraw(StudioEditableBaseTest):
                 "Board should not contain background image by default."
             )
 
-    def check_buttons(self, controls, add_vector_label="Add Selected Force"):
+    def assert_buttons(self, controls, add_vector_label="Add Selected Force"):
         # "Add vector" button
         add_vector = controls.find_element_by_css_selector(".add-vector")
         self.assertEquals(add_vector.text, add_vector_label)
@@ -91,19 +91,19 @@ class TestVectorDraw(StudioEditableBaseTest):
         reset = controls.find_element_by_css_selector(".reset")
         self.assertEquals(reset.text, "Reset")
         reset.find_element_by_css_selector(".sr")
-        self.check_hidden_text(".reset > .sr", "Reset board to initial state")
+        self.assert_hidden_text(".reset > .sr", "Reset board to initial state")
         # "Redo" button
         redo = controls.find_element_by_css_selector(".redo")
         redo.find_element_by_css_selector(".fa.fa-repeat")
         redo.find_element_by_css_selector(".sr")
-        self.check_hidden_text(".redo > .sr", "Redo last action")
+        self.assert_hidden_text(".redo > .sr", "Redo last action")
         # "Undo" button
         undo = controls.find_element_by_css_selector(".undo")
         undo.find_element_by_css_selector(".fa.fa-undo")
         undo.find_element_by_css_selector(".sr")
-        self.check_hidden_text(".undo > .sr", "Undo last action")
+        self.assert_hidden_text(".undo > .sr", "Undo last action")
 
-    def check_vector_properties(
+    def assert_vector_properties(
             self, menu, is_present=False, expected_label="Vector Properties",
             expected_name=None, expected_tail=None, expected_length=None, expected_angle=None,
             input_fields_disabled=True
@@ -113,22 +113,22 @@ class TestVectorDraw(StudioEditableBaseTest):
             vector_properties_label = vector_properties.find_element_by_css_selector("h3")
             self.assertEquals(vector_properties_label.text, expected_label)
             # Name
-            self.check_vector_property(
+            self.assert_vector_property(
                 vector_properties, "name", "select", "name:", expected_name or "-",
                 field_disabled=input_fields_disabled
             )
             # Tail
-            self.check_vector_property(
+            self.assert_vector_property(
                 vector_properties, "tail", "input", "tail position:", expected_tail or "",
                 field_disabled=input_fields_disabled
             )
             # Length
-            self.check_vector_property(
+            self.assert_vector_property(
                 vector_properties, "length", "input", "length:", expected_length or "",
                 field_disabled=input_fields_disabled
             )
             # Angle
-            self.check_vector_property(
+            self.assert_vector_property(
                 vector_properties, "angle", "input", "angle:", expected_angle or "",
                 field_disabled=input_fields_disabled
             )
@@ -146,7 +146,7 @@ class TestVectorDraw(StudioEditableBaseTest):
                 "If show_vector_properties is set to False, menu should not show vector properties."
             )
 
-    def check_vector_property(
+    def assert_vector_property(
             self, vector_properties, property_name, input_type, expected_label, expected_value=None,
             field_disabled=False
     ):
@@ -169,15 +169,15 @@ class TestVectorDraw(StudioEditableBaseTest):
             selected_option = vector_property_input.find_element_by_css_selector('option[selected="selected"]')
             self.assertEquals(selected_option.text, expected_value)
 
-    def check_actions(self):
+    def assert_actions(self):
         actions = self.exercise.find_element_by_css_selector(".action")
         self.assertTrue(actions.is_displayed())
         check = actions.find_element_by_css_selector(".check")
         self.assertEquals(check.text, "CHECK")
         check.find_element_by_css_selector(".sr")
-        self.check_hidden_text(".check > .sr", "Check your answer")
+        self.assert_hidden_text(".check > .sr", "Check your answer")
 
-    def check_add_dropdown(self, controls, vectors=[], points=[]):
+    def assert_add_dropdown(self, controls, vectors=[], points=[]):
         # Check dropdown
         dropdown = controls.find_element_by_css_selector("select")
         if not vectors and not points:
@@ -187,17 +187,17 @@ class TestVectorDraw(StudioEditableBaseTest):
                 "Dropdown should not list any vectors or points by default."
             )
         else:
-            self.check_add_options(dropdown, vectors, "vector")
+            self.assert_add_options(dropdown, vectors, "vector")
             non_fixed_points = [point for point in points if not point["fixed"]]
-            self.check_add_options(dropdown, non_fixed_points, "point")
+            self.assert_add_options(dropdown, non_fixed_points, "point")
         # Check label
         label_id = "element-list-add-label"
         label_selector = "#" + label_id
         controls.find_element_by_css_selector(label_selector)
-        self.check_hidden_text(label_selector, "Select element to add to board")
+        self.assert_hidden_text(label_selector, "Select element to add to board")
         self.assertEquals(dropdown.get_attribute("aria-labelledby"), label_id)
 
-    def check_add_options(self, dropdown, elements, element_type):
+    def assert_add_options(self, dropdown, elements, element_type):
         element_options = dropdown.find_elements_by_css_selector('option[value^="{}-"]'.format(element_type))
         self.assertEquals(len(element_options), len(elements))
         for element, element_option in zip(elements, element_options):
@@ -205,7 +205,7 @@ class TestVectorDraw(StudioEditableBaseTest):
             option_disabled = element_option.get_attribute("disabled")
             self.assertEquals(bool(option_disabled), element["render"])
 
-    def check_edit_dropdown(self, menu, vectors=[], points=[]):
+    def assert_edit_dropdown(self, menu, vectors=[], points=[]):
         vector_properties = menu.find_element_by_css_selector(".vector-properties")
         # Check dropdown
         dropdown = vector_properties.find_element_by_css_selector("select")
@@ -216,12 +216,12 @@ class TestVectorDraw(StudioEditableBaseTest):
             self.assertEquals(default_option.get_attribute("value"), "-")
         else:
             if vectors:
-                self.check_edit_options(dropdown, vectors, "vector")
+                self.assert_edit_options(dropdown, vectors, "vector")
             if points:
                 non_fixed_points = [point for point in points if not point["fixed"]]
-                self.check_edit_options(dropdown, non_fixed_points, "point")
+                self.assert_edit_options(dropdown, non_fixed_points, "point")
 
-    def check_edit_options(self, dropdown, elements, element_type):
+    def assert_edit_options(self, dropdown, elements, element_type):
         element_options = dropdown.find_elements_by_css_selector('option[value^="{}-"]'.format(element_type))
         self.assertEquals(len(element_options), len(elements))
         for element, element_option in zip(elements, element_options):
@@ -229,7 +229,7 @@ class TestVectorDraw(StudioEditableBaseTest):
             option_disabled = element_option.get_attribute("disabled")
             self.assertNotEquals(bool(option_disabled), element["render"])
 
-    def check_vectors(self, board, vectors):
+    def assert_vectors(self, board, vectors):
         line_elements = board.find_elements_by_css_selector("line")
         point_elements = board.find_elements_by_css_selector("ellipse")
         for vector in vectors:
@@ -253,7 +253,7 @@ class TestVectorDraw(StudioEditableBaseTest):
                 self.assertFalse(board_has_tip)
                 self.assertFalse(board_has_label)
 
-    def check_points(self, board, points):
+    def assert_points(self, board, points):
         point_elements = board.find_elements_by_css_selector("ellipse")
         for point in points:
             board_has_point = self.board_has_point(point["expected_position"], point_elements)
@@ -313,14 +313,14 @@ class TestVectorDraw(StudioEditableBaseTest):
         add_vector.click()
         # Board should now show vector
         vectors[0]["render"] = True
-        self.check_vectors(board, vectors)
+        self.assert_vectors(board, vectors)
         # "Vector Properties" should display correct info
-        self.check_vector_properties(
+        self.assert_vector_properties(
             menu, is_present=True, expected_label="Custom properties label",
             expected_name="N", expected_tail="2.00, 2.00", expected_length="4.00", expected_angle="45.00",
             input_fields_disabled=False
         )
-        self.check_edit_dropdown(menu, vectors)
+        self.assert_edit_dropdown(menu, vectors)
 
     def add_point(self, board, points):
         menu = self.exercise.find_element_by_css_selector(".menu")
@@ -329,7 +329,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         add_vector.click()
         # Board should now show point
         points[0]["render"] = True
-        self.check_points(board, points)
+        self.assert_points(board, points)
 
     def undo(self, board, vectors):
         menu = self.exercise.find_element_by_css_selector(".menu")
@@ -338,7 +338,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         undo.click()
         # Board should not show vector anymore
         vectors[0]["render"] = False
-        self.check_vectors(board, vectors)
+        self.assert_vectors(board, vectors)
 
     def redo(self, board, vectors):
         menu = self.exercise.find_element_by_css_selector(".menu")
@@ -347,9 +347,9 @@ class TestVectorDraw(StudioEditableBaseTest):
         redo.click()
         # Board should now show vector
         vectors[0]["render"] = True
-        self.check_vectors(board, vectors)
+        self.assert_vectors(board, vectors)
         # "Vector Properties" should display correct info
-        self.check_vector_properties(
+        self.assert_vector_properties(
             menu, is_present=True, expected_label="Custom properties label",
             expected_name="N", expected_tail="2.00, 2.00", expected_length="4.00", expected_angle="45.00",
             input_fields_disabled=False
@@ -362,17 +362,17 @@ class TestVectorDraw(StudioEditableBaseTest):
         reset.click()
         # Board should not show vector anymore
         vectors[0]["render"] = False
-        self.check_vectors(board, vectors)
+        self.assert_vectors(board, vectors)
         # Board should not show point anymore
         points[0]["render"] = False
-        self.check_points(board, points)
+        self.assert_points(board, points)
 
     def submit_answer(self):
         actions = self.exercise.find_element_by_css_selector(".action")
         check = actions.find_element_by_css_selector(".check")
         check.click()
 
-    def check_status(self, answer_correct=True, expected_message="Test passed"):
+    def assert_status(self, answer_correct=True, expected_message="Test passed"):
         status = self.exercise.find_element_by_css_selector(".vectordraw-status")
         self.assertTrue(status.is_displayed())
         correctness = status.find_element_by_css_selector(".correctness")
@@ -402,14 +402,14 @@ class TestVectorDraw(StudioEditableBaseTest):
         self.load_scenario("xml/defaults.xml")
 
         # Check title and description
-        self.check_title_and_description()
+        self.assert_title_and_description()
 
         # Check board
         board = self.exercise.find_element_by_css_selector("#jxgboard1")
-        self.check_dimensions(board)
-        self.check_axis(board)
-        self.check_navigation_bar(board)
-        self.check_background(board)
+        self.assert_dimensions(board)
+        self.assert_axis(board)
+        self.assert_navigation_bar(board)
+        self.assert_background(board)
         # - Vectors
         self.assert_not_present(
             board,
@@ -426,13 +426,13 @@ class TestVectorDraw(StudioEditableBaseTest):
         # Check menu
         menu = self.exercise.find_element_by_css_selector(".menu")
         controls = menu.find_element_by_css_selector(".controls")
-        self.check_add_dropdown(controls)
-        self.check_buttons(controls)
-        self.check_vector_properties(menu, is_present=True)
-        self.check_edit_dropdown(menu)
+        self.assert_add_dropdown(controls)
+        self.assert_buttons(controls)
+        self.assert_vector_properties(menu, is_present=True)
+        self.assert_edit_dropdown(menu)
 
         # Check actions
-        self.check_actions()
+        self.assert_actions()
 
     @data(
         {
@@ -502,35 +502,35 @@ class TestVectorDraw(StudioEditableBaseTest):
         self.load_scenario("xml/custom.xml", params=params)
 
         # Check title and description
-        self.check_title_and_description(
+        self.assert_title_and_description(
             expected_title="Custom Exercise", expected_description="Custom exercise description"
         )
 
         # Check board
         board = self.exercise.find_element_by_css_selector("#jxgboard1")
-        self.check_dimensions(board, expected_width="600px", expected_height="450px")
-        self.check_axis(board, is_present=True)
-        self.check_navigation_bar(board, is_present=True)
-        self.check_background(board, is_present=True)
+        self.assert_dimensions(board, expected_width="600px", expected_height="450px")
+        self.assert_axis(board, is_present=True)
+        self.assert_navigation_bar(board, is_present=True)
+        self.assert_background(board, is_present=True)
         # - Vectors
-        self.check_vectors(board, vectors)
+        self.assert_vectors(board, vectors)
         # - Points
-        self.check_points(board, points)
+        self.assert_points(board, points)
 
         # Check menu
         menu = self.exercise.find_element_by_css_selector(".menu")
         controls = menu.find_element_by_css_selector(".controls")
-        self.check_add_dropdown(controls, vectors, points)
-        self.check_buttons(controls, add_vector_label="Custom button label")
+        self.assert_add_dropdown(controls, vectors, points)
+        self.assert_buttons(controls, add_vector_label="Custom button label")
         show_vector_properties = params["show_vector_properties"]
         if show_vector_properties:
-            self.check_vector_properties(menu, is_present=True, expected_label="Custom properties label")
-            self.check_edit_dropdown(menu, vectors, points)
+            self.assert_vector_properties(menu, is_present=True, expected_label="Custom properties label")
+            self.assert_edit_dropdown(menu, vectors, points)
         else:
-            self.check_vector_properties(menu)
+            self.assert_vector_properties(menu)
 
         # Check actions
-        self.check_actions()
+        self.assert_actions()
 
     @data("line", "tail", "tip")
     def test_select_vector(self, click_target):
@@ -572,7 +572,7 @@ class TestVectorDraw(StudioEditableBaseTest):
             tip.click()
         # Check if "Vector Properties" shows correct info
         menu = self.exercise.find_element_by_css_selector(".menu")
-        self.check_vector_properties(
+        self.assert_vector_properties(
             menu, is_present=True, expected_label="Custom properties label",
             expected_name="N", expected_tail="2.00, 2.00", expected_length="4.00", expected_angle="45.00",
             input_fields_disabled=False
@@ -603,7 +603,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         board = self.exercise.find_element_by_css_selector("#jxgboard1")
         # Board should not show vector initially
         vectors = json.loads(params["vectors"])
-        self.check_vectors(board, vectors)
+        self.assert_vectors(board, vectors)
         # Add vector
         self.add_vector(board, vectors)
 
@@ -629,7 +629,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         board = self.exercise.find_element_by_css_selector("#jxgboard1")
         # Board should not show point initially
         points = json.loads(params["points"])
-        self.check_points(board, points)
+        self.assert_points(board, points)
         # Add point
         self.add_point(board, points)
 
@@ -658,7 +658,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         board = self.exercise.find_element_by_css_selector("#jxgboard1")
         # Board should not show vector initially
         vectors = json.loads(params["vectors"])
-        self.check_vectors(board, vectors)
+        self.assert_vectors(board, vectors)
         # Add vector
         self.add_vector(board, vectors)
         # Undo
@@ -689,7 +689,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         board = self.exercise.find_element_by_css_selector("#jxgboard1")
         # Board should not show vector initially
         vectors = json.loads(params["vectors"])
-        self.check_vectors(board, vectors)
+        self.assert_vectors(board, vectors)
         # Add vector
         self.add_vector(board, vectors)
         # Undo
@@ -731,10 +731,10 @@ class TestVectorDraw(StudioEditableBaseTest):
         board = self.exercise.find_element_by_css_selector("#jxgboard1")
         # Board should not show vector initially
         vectors = json.loads(params["vectors"])
-        self.check_vectors(board, vectors)
+        self.assert_vectors(board, vectors)
         # Board should not show point initially
         points = json.loads(params["points"])
-        self.check_points(board, points)
+        self.assert_points(board, points)
         # Add vector
         self.add_vector(board, vectors)
         # Add point
@@ -775,7 +775,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         # Submit answer
         self.submit_answer()
         # Check status
-        self.check_status()
+        self.assert_status()
 
     @data(
         {
@@ -810,7 +810,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         # Submit answer
         self.submit_answer()
         # Check status
-        self.check_status(
+        self.assert_status(
             answer_correct=False, expected_message="Vector N does not start at correct point."
         )
 
@@ -863,7 +863,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         board = self.exercise.find_element_by_css_selector("#jxgboard1")
         vectors = json.loads(params["vectors"])
         # Board should not show vector initially
-        self.check_vectors(board, vectors)
+        self.assert_vectors(board, vectors)
         # Add vector
         self.add_vector(board, vectors)
         # Submit answer
@@ -874,12 +874,12 @@ class TestVectorDraw(StudioEditableBaseTest):
         board = self.exercise.find_element_by_css_selector("#jxgboard1")
         # Board should show vector
         vectors[0]["render"] = True
-        self.check_vectors(board, vectors)
+        self.assert_vectors(board, vectors)
         # Status should show last result
         if params["answer_correct"]:
-            self.check_status()
+            self.assert_status()
         else:
-            self.check_status(
+            self.assert_status(
                 answer_correct=False, expected_message="Vector N does not start at correct point."
             )
 
@@ -908,7 +908,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         board = self.exercise.find_element_by_css_selector("#jxgboard1")
         # Board should not show vector initially
         vectors = json.loads(params["vectors"])
-        self.check_vectors(board, vectors)
+        self.assert_vectors(board, vectors)
         # Add vector
         self.add_vector(board, vectors)
         # Change tail
@@ -917,7 +917,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         vectors[0]["expected_line_position"] = {'x1': 370, 'y1': 159, 'x2': 425, 'y2': 102}
         vectors[0]["expected_tail_position"] = {'cx': 370, 'cy': 159}
         vectors[0]["expected_tip_position"] = {'cx': 434, 'cy': 94}
-        self.check_vectors(board, vectors)
+        self.assert_vectors(board, vectors)
 
     @data(
         {
@@ -944,7 +944,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         board = self.exercise.find_element_by_css_selector("#jxgboard1")
         # Board should not show vector initially
         vectors = json.loads(params["vectors"])
-        self.check_vectors(board, vectors)
+        self.assert_vectors(board, vectors)
         # Add vector
         self.add_vector(board, vectors)
         # Change tail
@@ -953,7 +953,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         vectors[0]["expected_line_position"] = {'x1': 347, 'y1': 181, 'x2': 434, 'y2': 93}
         vectors[0]["expected_tail_position"] = {'cx': 347, 'cy': 181}
         vectors[0]["expected_tip_position"] = {'cx': 443, 'cy': 85}
-        self.check_vectors(board, vectors)
+        self.assert_vectors(board, vectors)
 
     @data(
         {
@@ -980,7 +980,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         board = self.exercise.find_element_by_css_selector("#jxgboard1")
         # Board should not show vector initially
         vectors = json.loads(params["vectors"])
-        self.check_vectors(board, vectors)
+        self.assert_vectors(board, vectors)
         # Add vector
         self.add_vector(board, vectors)
         # Change tail
@@ -989,7 +989,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         vectors[0]["expected_line_position"] = {'x1': 347, 'y1': 181, 'x2': 269, 'y2': 167}
         vectors[0]["expected_tail_position"] = {'cx': 347, 'cy': 181}
         vectors[0]["expected_tip_position"] = {'cx': 258, 'cy': 165}
-        self.check_vectors(board, vectors)
+        self.assert_vectors(board, vectors)
 
     @data(
         {
@@ -1016,7 +1016,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         board = self.exercise.find_element_by_css_selector("#jxgboard1")
         # Board should not show vector initially
         vectors = json.loads(params["vectors"])
-        self.check_vectors(board, vectors)
+        self.assert_vectors(board, vectors)
         # Add vector
         self.add_vector(board, vectors)
         # Change tail
@@ -1025,7 +1025,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         vectors[0]["expected_line_position"] = {'x1': 347, 'y1': 181, 'x2': 402, 'y2': 125}
         vectors[0]["expected_tail_position"] = {'cx': 347, 'cy': 181}
         vectors[0]["expected_tip_position"] = {'cx': 411, 'cy': 117}
-        self.check_vectors(board, vectors)
+        self.assert_vectors(board, vectors)
         # Check error message
         error_message = self.exercise.find_element_by_css_selector(".update-error");
         self.wait_until_visible(error_message)

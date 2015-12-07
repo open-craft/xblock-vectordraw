@@ -530,7 +530,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         # Save result
         self.result = result
         # Publish grade data
-        score = 1 if result["ok"] else 0
+        score = 1 if result["correct"] else 0
         self.runtime.publish(self, 'grade', dict(value=score, max_value=1))
         return {
             "result": result,

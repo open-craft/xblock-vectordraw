@@ -593,7 +593,7 @@ function VectorDrawXBlock(runtime, element, init_args) {
         var correctness = $('.correctness', element),
             correctClass = 'checkmark-correct fa fa-check',
             incorrectClass = 'checkmark-incorrect fa fa-times';
-        if (data.result.ok) {
+        if (data.result.correct) {
             correctness.removeClass(incorrectClass);
             correctness.addClass(correctClass);
         } else {
