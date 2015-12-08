@@ -288,10 +288,10 @@ class TestVectorDraw(StudioEditableBaseTest):
         expected_line_position = position.items()
         for line in line_elements:
             line_position = {
-                "x1": int(float(line.get_attribute("x1"))),
-                "y1": int(float(line.get_attribute("y1"))),
-                "x2": int(float(line.get_attribute("x2"))),
-                "y2": int(float(line.get_attribute("y2"))),
+                "x1": int(line.get_attribute("x1").split(".", 1)[0]),
+                "y1": int(line.get_attribute("y1").split(".", 1)[0]),
+                "x2": int(line.get_attribute("x2").split(".", 1)[0]),
+                "y2": int(line.get_attribute("y2").split(".", 1)[0]),
             }.items()
             if line_position == expected_line_position:
                 return line
@@ -300,8 +300,8 @@ class TestVectorDraw(StudioEditableBaseTest):
         expected_position = position.items()
         for point in point_elements:
             point_position = {
-                "cx": int(round(float(point.get_attribute("cx")))),
-                "cy": int(round(float(point.get_attribute("cy")))),
+                "cx": int(point.get_attribute("cx").split(".", 1)[0]),
+                "cy": int(point.get_attribute("cy").split(".", 1)[0]),
             }.items()
             if point_position == expected_position:
                 return point
@@ -377,9 +377,9 @@ class TestVectorDraw(StudioEditableBaseTest):
         self.assertTrue(status.is_displayed())
         correctness = status.find_element_by_css_selector(".correctness")
         if answer_correct:
-            self.assertTrue("checkmark-correct fa fa-check" in correctness.get_attribute("class"))
+            self.assertIn("checkmark-correct fa fa-check", correctness.get_attribute("class"))
         else:
-            self.assertTrue("checkmark-incorrect fa fa-times" in correctness.get_attribute("class"))
+            self.assertIn("checkmark-incorrect fa fa-times", correctness.get_attribute("class"))
         status_message = status.find_element_by_css_selector(".status-message")
         self.assertEquals(status_message.text, expected_message)
 
@@ -915,7 +915,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         self.change_property("tail", "3, 3")
         # Check new position: Tail updated, tip updated
         vectors[0]["expected_line_position"] = {'x1': 370, 'y1': 159, 'x2': 425, 'y2': 102}
-        vectors[0]["expected_tail_position"] = {'cx': 370, 'cy': 159}
+        vectors[0]["expected_tail_position"] = {'cx': 369, 'cy': 158}
         vectors[0]["expected_tip_position"] = {'cx': 434, 'cy': 94}
         self.assert_vectors(board, vectors)
 

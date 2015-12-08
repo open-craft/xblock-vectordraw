@@ -99,11 +99,11 @@ function VectorDrawXBlock(runtime, element, init_args) {
         vectorProperties.attr("id", id + "-vector-properties");
 
         // Draw vectors and points
-        this.settings.points.forEach(function(point, idx) {
+        _.each(this.settings.points, function(point, idx) {
             renderAndSetMenuOptions(point, idx, 'point', this);
         }, this);
 
-        this.settings.vectors.forEach(function(vec, idx) {
+        _.each(this.settings.vectors, function(vec, idx) {
             renderAndSetMenuOptions(vec, idx, 'vector', this);
         }, this);
 
@@ -210,7 +210,7 @@ function VectorDrawXBlock(runtime, element, init_args) {
         var lineID = lineElement.attr("id");
 
         var titleID = lineID + "-title";
-        var titleElement = $("<title>").attr("id", titleID).text(vec.name);
+        var titleElement = $("<title>", {"id": titleID, "text": vec.name});
         lineElement.append(titleElement);
         lineElement.attr("aria-labelledby", titleID);
 
@@ -245,7 +245,7 @@ function VectorDrawXBlock(runtime, element, init_args) {
             selector = selector.split('-');
             return {
                 type: selector[0],
-                idx: parseInt(selector[1])
+                idx: parseInt(selector[1], 10)
             };
         }
         return {};
@@ -513,13 +513,13 @@ function VectorDrawXBlock(runtime, element, init_args) {
 
     VectorDraw.prototype.getState = function() {
         var vectors = {}, points = {};
-        this.settings.vectors.forEach(function(vec) {
+        _.each(this.settings.vectors, function(vec) {
             var coords = this.getVectorCoords(vec.name);
             if (coords) {
                 vectors[vec.name] = coords;
             }
         }, this);
-        this.settings.points.forEach(function(point) {
+        _.each(this.settings.points, function(point) {
             var obj = this.board.elementsByName[point.name];
             if (obj) {
                 points[point.name] = [obj.X(), obj.Y()];
@@ -529,7 +529,7 @@ function VectorDrawXBlock(runtime, element, init_args) {
     };
 
     VectorDraw.prototype.setState = function(state) {
-        this.settings.vectors.forEach(function(vec, idx) {
+        _.each(this.settings.vectors, function(vec, idx) {
             var vec_state = state.vectors[vec.name];
             if (vec_state) {
                 this.renderVector(idx, [vec_state.tail, vec_state.tip]);
@@ -537,7 +537,7 @@ function VectorDrawXBlock(runtime, element, init_args) {
                 this.removeVector(idx);
             }
         }, this);
-        this.settings.points.forEach(function(point, idx) {
+        _.each(this.settings.points, function(point, idx) {
             var point_state = state.points[point.name];
             if (point_state) {
                 this.renderPoint(idx, point_state);
@@ -567,10 +567,11 @@ function VectorDrawXBlock(runtime, element, init_args) {
             }
             checks.push(presence_check);
 
-            [
+            var properties = [
                 'tail', 'tail_x', 'tail_y', 'tip', 'tip_x', 'tip_y', 'coords',
                 'length', 'angle', 'segment_angle', 'segment_coords', 'points_on_line'
-            ].forEach(function(prop) {
+            ];
+            _.each(properties, function(prop) {
                 if (prop in answer) {
                     var check = {vector: name, check: prop, expected: answer[prop]};
                     if (prop + '_tolerance' in answer) {

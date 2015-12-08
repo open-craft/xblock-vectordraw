@@ -85,11 +85,11 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
             }
         }
 
-        this.settings.points.forEach(function(point, idx) {
+        _.each(this.settings.points, function(point, idx) {
             this.renderPoint(idx);
         }, this);
 
-        this.settings.vectors.forEach(function(vec, idx) {
+        _.each(this.settings.vectors, function(vec, idx) {
             this.renderVector(idx);
         }, this);
 
@@ -182,7 +182,7 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
         var lineID = lineElement.attr("id");
 
         var titleID = lineID + "-title";
-        var titleElement = $("<title>").attr("id", titleID).text(vec.name);
+        var titleElement = $("<title>", {"id": titleID, "text": vec.name});
         lineElement.append(titleElement);
         lineElement.attr("aria-labelledby", titleID);
 
@@ -656,7 +656,7 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
 
     VectorDraw.prototype.getState = function() {
         var vectors = [];
-        this.settings.vectors.forEach(function(vec) {
+        _.each(this.settings.vectors, function(vec) {
             if (vec.deleted) {
                 return;
             }

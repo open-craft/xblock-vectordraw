@@ -486,27 +486,27 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         # Check vectors
         vectors = data.get('vectors')
         if not isinstance(vectors, dict):
-            return False
+            raise ValueError
         for vector_data in vectors.values():
             # Validate vector
             if not vector_data.viewkeys() == {'tail', 'tip'}:
-                return False
+                raise ValueError
             # Validate tip and tail
             tip = vector_data['tip']
             tip_valid = isinstance(tip, list) and len(tip) == 2
             tail = vector_data['tail']
             tail_valid = isinstance(tail, list) and len(tail) == 2
             if not (tip_valid and tail_valid):
-                return False
+                raise ValueError
         # Check points
         points = data.get('points')
         if not isinstance(points, dict):
-            return False
+            raise ValueError
         for coords in points.values():
             # Validate point
             point_valid = isinstance(coords, list) and len(coords) == 2
             if not point_valid:
-                return False
+                raise ValueError
         # If we get to this point, it means that vector and point data is valid;
         # the only thing left to check is whether data contains a list of checks:
         return 'checks' in data
@@ -517,7 +517,9 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         Check and persist student's answer to this vector drawing problem.
         """
         # Validate data
-        if not self._validate_check_answer_data(data):
+        try:
+            self._validate_check_answer_data(data)
+        except ValueError:
             raise JsonHandlerError(400, "Invalid data")
         # Save answer
         self.answer = dict(

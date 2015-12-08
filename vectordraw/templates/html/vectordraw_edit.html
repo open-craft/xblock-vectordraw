@@ -15,10 +15,10 @@
                       id="xb-field-edit-{{field.name}}"
                       aria-describedby="{{field.name}}-help">
                 <option value="1" {% if field.value %}selected{% endif %}>
-                  True {% if field.default %}&nbsp;&nbsp;&nbsp;&nbsp;(Default){% endif %}
+                  {% trans "True" %} {% if field.default %}&nbsp;&nbsp;&nbsp;&nbsp;({% trans "Default" %}){% endif %}
                 </option>
                 <option value="0" {% if not field.value %}selected{% endif %}>
-                  False {% if not field.default %}&nbsp;&nbsp;&nbsp;&nbsp;(Default){% endif %}
+                  {% trans "False" %} {% if not field.default %}&nbsp;&nbsp;&nbsp;&nbsp;({% trans "Default" %}){% endif %}
                 </option>
               </select>
             {% elif field.type == "string" %}
@@ -68,7 +68,10 @@
             WYSIWYG Editor
             <button class="info-button" title="Info">
               <span class="info-label fa fa-question" aria-hidden="true"></span>
-              <span class="sr">{% trans "Toggle information about how to use WYSIWYG editor" %}</span>
+              <span class="sr">
+                {# Translators: WYSIWYG stands for What You See Is What You Get. When using a WYSIWYG editor, the content being edited is shown in a way that closely corresponds to the finished product. #}
+                {% trans "Toggle information about how to use the WYSIWYG editor" %}
+              </span>
             </button>
           </h2>
 
