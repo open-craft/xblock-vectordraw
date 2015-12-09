@@ -509,7 +509,8 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
                 raise ValueError
         # If we get to this point, it means that vector and point data is valid;
         # the only thing left to check is whether data contains a list of checks:
-        return 'checks' in data
+        if 'checks' not in data:
+            raise ValueError
 
     @XBlock.json_handler
     def check_answer(self, data, suffix=''):  # pylint: disable=unused-argument
