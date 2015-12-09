@@ -12,8 +12,8 @@
   <div id="vectordraw">
     <div class="menu" style="width: {{ self.width }}px;">
       <div class="controls">
-        <span class="sr" id="element-list-add-label">{% trans "Select element to add to board" %}</span>
-        <select class="element-list-add" aria-labelledby="element-list-add-label">
+        <label class="sr" for="element-list">{% trans "Select element to add to board" %}</label>
+        <select id="element-list" class="element-list-add">
           {% for vector in self.get_vectors %}
             <option value="vector-{{ forloop.counter0 }}">
               {{ vector.description }}

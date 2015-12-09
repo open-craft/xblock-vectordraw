@@ -4,7 +4,7 @@
               description="Custom exercise description"
               width="600"
               height="450"
-              axis="true"
+              axis="false"
               show_navigation="true"
               show_vector_properties="{{ show_vector_properties }}"
               show_slope_for_lines="true"

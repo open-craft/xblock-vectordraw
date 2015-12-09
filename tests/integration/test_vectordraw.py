@@ -89,7 +89,8 @@ class TestVectorDraw(StudioEditableBaseTest):
         self.assertEquals(add_vector.text, add_vector_label)
         # "Reset" button
         reset = controls.find_element_by_css_selector(".reset")
-        self.assertEquals(reset.text, "Reset")
+        reset_label = reset.find_element_by_css_selector('.reset-label')
+        self.assertEquals(reset_label.text, "Reset")
         reset.find_element_by_css_selector(".sr")
         self.assert_hidden_text(".reset > .sr", "Reset board to initial state")
         # "Redo" button
@@ -173,7 +174,8 @@ class TestVectorDraw(StudioEditableBaseTest):
         actions = self.exercise.find_element_by_css_selector(".action")
         self.assertTrue(actions.is_displayed())
         check = actions.find_element_by_css_selector(".check")
-        self.assertEquals(check.text, "CHECK")
+        check_label = check.find_element_by_css_selector(".check-label")
+        self.assertEquals(check_label.text, "CHECK")
         check.find_element_by_css_selector(".sr")
         self.assert_hidden_text(".check > .sr", "Check your answer")
 
@@ -191,11 +193,11 @@ class TestVectorDraw(StudioEditableBaseTest):
             non_fixed_points = [point for point in points if not point["fixed"]]
             self.assert_add_options(dropdown, non_fixed_points, "point")
         # Check label
-        label_id = "element-list-add-label"
-        label_selector = "#" + label_id
-        controls.find_element_by_css_selector(label_selector)
+        label_selector = "label.sr"
+        select_label = controls.find_element_by_css_selector(label_selector)
         self.assert_hidden_text(label_selector, "Select element to add to board")
-        self.assertEquals(dropdown.get_attribute("aria-labelledby"), label_id)
+        select_id = "element-list"
+        self.assertEquals(select_label.get_attribute("for"), select_id)
 
     def assert_add_options(self, dropdown, elements, element_type):
         element_options = dropdown.find_elements_by_css_selector('option[value^="{}-"]'.format(element_type))
@@ -407,19 +409,19 @@ class TestVectorDraw(StudioEditableBaseTest):
         # Check board
         board = self.exercise.find_element_by_css_selector("#jxgboard1")
         self.assert_dimensions(board)
-        self.assert_axis(board)
+        self.assert_axis(board, is_present=True)
         self.assert_navigation_bar(board)
         self.assert_background(board)
         # - Vectors
         self.assert_not_present(
             board,
-            "line",
+            "line[aria-labelledby]",  # axes (which are present by default) don't have aria-labelledby attribute
             "Board should not contain any vectors or lines by default."
         )
         # - Points
         self.assert_not_present(
             board,
-            "ellipse",
+            "ellipse:not([display])",  # points don't have in-line "display" property
             "Board should not contain any points by default."
         )
 
@@ -509,7 +511,7 @@ class TestVectorDraw(StudioEditableBaseTest):
         # Check board
         board = self.exercise.find_element_by_css_selector("#jxgboard1")
         self.assert_dimensions(board, expected_width="600px", expected_height="450px")
-        self.assert_axis(board, is_present=True)
+        self.assert_axis(board)
         self.assert_navigation_bar(board, is_present=True)
         self.assert_background(board, is_present=True)
         # - Vectors

@@ -63,6 +63,7 @@
     text-decoration: none;
 }
 
+.vectordraw_block .menu button:focus,
 .vectordraw_block .menu button:hover {
     background: #c2e0f4;
     background-image: -webkit-linear-gradient(top, #c2e0f4, #add5f0);
@@ -143,7 +144,6 @@
 
 /* Make sure screen-reader content is hidden in the workbench: */
 .vectordraw_block .sr {
-    display: none;
     border: 0;
     clip: rect(0 0 0 0);
     height: 1px;

@@ -74,8 +74,13 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
 
     axis = Boolean(
         display_name="Show axis",
-        help="Show the graph axis",
-        default=False,
+        help=(
+            "Show the graph axis. "
+            "Will also show grid lines (but note that the background image might cover them). "
+            "Enabling this option makes the exercise more accessible for users "
+            "relying on the keyboard for manipulating vectors."
+        ),
+        default=True,
         scope=Scope.content
     )
 
