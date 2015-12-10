@@ -1,0 +1,122 @@
+.vectordraw_edit_block,
+.vectordraw_edit_block .jxgboard {
+    display: block;
+}
+
+.vectordraw_edit_block {
+    border-top: 1px solid #e5e5e5;
+    margin-left: 20px;
+    margin-right: 20px;
+    padding-top: 20px;
+}
+
+.vectordraw_edit_block h2 {
+    margin-bottom: 1em;
+}
+
+.vectordraw_edit_block #wysiwyg-description {
+    display: none;
+}
+
+.vectordraw_edit_block p {
+    margin-bottom: 1em;
+    font-size: 0.9em;
+}
+
+.vectordraw_edit_block .jxgboard {
+    float: left;
+    margin-bottom: 1em;
+}
+
+/* Menu */
+
+.vectordraw_edit_block .menu .controls .result-mode {
+    float: right;
+}
+
+.vectordraw_edit_block .menu .controls button:disabled {
+    pointer-events: none;
+    border: 1px solid #707070;
+    background-color: #ececec;
+    color: #868686;
+}
+
+.vectordraw_edit_block .menu .vector-properties .vector-prop-list .row .vector-prop-name,
+.vectordraw_edit_block .menu .vector-properties .vector-prop-list .row .vector-prop-tail,
+.vectordraw_edit_block .menu .vector-properties .vector-prop-list .row .vector-prop-angle {
+    padding-right: 0px;
+}
+
+.vectordraw_edit_block .menu .vector-properties .vector-prop-list .row .vector-select,
+.vectordraw_edit_block .menu .vector-properties .vector-prop-list .row .vector-prop-label,
+.vectordraw_edit_block .menu .vector-properties .vector-prop-list .row .vector-prop-length {
+    padding-right: 5px;
+}
+
+.vectordraw_edit_block .menu .vector-properties .vector-prop-list .row select,
+.vectordraw_edit_block .menu .vector-properties .vector-prop-list .row input {
+    height: 2em;
+}
+
+.vectordraw_edit_block .menu .vector-properties .vector-prop-list .row select {
+    padding: 0px;
+}
+
+.vectordraw_edit_block .menu .vector-properties .vector-prop-list .row .vector-remove {
+    vertical-align: bottom;
+}
+
+.vectordraw_edit_block .menu .vector-properties .vector-prop-list .row .vector-remove button {
+    float: right;
+}
+
+.vectordraw_block .menu .vector-properties .vector-prop-list .row .vector-prop-update .update-pending {
+    display: none;
+    color: #ffa500;
+}
+
+.vectordraw_edit_block h3 {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.vectordraw_edit_block .checks {
+    display: none;
+    width: 220px;
+    float: right;
+    border-top: 2px solid #1f628d;
+    border-right: 2px solid #1f628d;
+    border-bottom: 2px solid #1f628d;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    padding-left: 10px;
+    background-color: #f7f7f7;
+    overflow: auto;
+}
+
+.vectordraw_edit_block .checks .check .row {
+    height: 2em;
+}
+
+.vectordraw_edit_block .checks .check span,
+.vectordraw_edit_block .checks .check input[type="number"] {
+    height: 1.5em;
+    min-width: 0px;
+    margin-right: 12px;
+}
+
+.vectordraw_edit_block .checks .check input[type="number"] {
+    padding: 0 0 0 5px;
+}
+
+.vectordraw_edit_block .checks .check input[type="checkbox"] {
+    height: 1.2em;
+    width: 20%;
+    min-width: 0px;
+    margin-top: 2px;
+}
+
+.vectordraw_edit_block .checks .check input {
+    float: right;
+    vertical-align: middle;
+}

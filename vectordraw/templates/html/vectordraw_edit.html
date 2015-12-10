@@ -1,0 +1,375 @@
+{% load i18n %}
+<div class="editor-with-buttons">
+  <div class="wrapper-comp-settings is-active editor-with-buttons" id="settings-tab">
+    <ul class="list-input settings-list">
+      {% for field in fields %}
+        <li class="field comp-setting-entry metadata_entry {% if field.is_set %}is-set{% endif %}"
+            data-field-name="{{field.name}}"
+            data-default="{% if field.type == 'boolean' %}{{ field.default|yesno:'1,0' }}{% else %}{{ field.default|default_if_none:"" }}{% endif %}"
+            data-cast="{{field.type}}">
+          <div class="wrapper-comp-setting{% if field.type == "set" %} metadata-list-enum {%endif%}">
+            <label class="label setting-label" for="xb-field-edit-{{field.name}}">{{field.display_name}}</label>
+
+            {% if field.type == "boolean" %}
+              <select class="field-data-control"
+                      id="xb-field-edit-{{field.name}}"
+                      aria-describedby="{{field.name}}-help">
+                <option value="1" {% if field.value %}selected{% endif %}>
+                  {% trans "True" %} {% if field.default %}&nbsp;&nbsp;&nbsp;&nbsp;({% trans "Default" %}){% endif %}
+                </option>
+                <option value="0" {% if not field.value %}selected{% endif %}>
+                  {% trans "False" %} {% if not field.default %}&nbsp;&nbsp;&nbsp;&nbsp;({% trans "Default" %}){% endif %}
+                </option>
+              </select>
+            {% elif field.type == "string" %}
+              <input type="text"
+                     class="field-data-control"
+                     id="xb-field-edit-{{field.name}}"
+                     value="{{field.value|default_if_none:""}}"
+                     aria-describedby="{{field.name}}-help">
+            {% elif field.type == "integer" or field.type == "float" %}
+              <input type="number"
+                     class="field-data-control"
+                     id="xb-field-edit-{{field.name}}"
+                     {% if field.step %} step="{{field.step}}" {% elif field.type == "integer" %} step=1 {% endif %}
+                     {% if field.max %} max="{{field.max}}" {% endif %}
+                     {% if field.min %} min="{{field.min}}" {% endif %}
+                     value="{{field.value|default_if_none:""}}"
+                     aria-describedby="{{field.name}}-help">
+            {% elif field.type == "text" or field.type == "html" %}
+              <textarea class="field-data-control"
+                        data-field-name="{{field.name}}"
+                        id="xb-field-edit-{{field.name}}"
+                        aria-describedby="{{field.name}}-help"
+                        rows=10 cols=70>{{field.value}}</textarea>
+            {% else %}
+              {% trans "Unsupported field type. This setting cannot be edited." %}
+            {% endif %}
+
+            {% if field.allow_reset %}
+              <button class="action setting-clear {% if field.is_set %}active{%else%}inactive{% endif %}"
+                      type="button"
+                      name="setting-clear"
+                      value="{% trans "Clear" %}"
+                      data-tooltip="{% trans "Clear" %}">
+                <i class="icon fa fa-undo"></i><span class="sr">{% trans "Clear Value" %}</span>
+              </button>
+            {% endif %}
+          </div>
+          {% if field.help %}
+            <span id="{{field.name}}-help" class="tip setting-help"> {{ field.help|safe }} </span>
+          {% endif %}
+        </li>
+      {% endfor %}
+      <li>
+        <!-- WYSIWYG editor -->
+        <div class="vectordraw_block vectordraw_edit_block">
+          <h2 aria-describedby="wysiwyg-description">
+            WYSIWYG Editor
+            <button class="info-button" title="Info">
+              <span class="info-label fa fa-question" aria-hidden="true"></span>
+              <span class="sr">
+                {# Translators: WYSIWYG stands for What You See Is What You Get. When using a WYSIWYG editor, the content being edited is shown in a way that closely corresponds to the finished product. #}
+                {% trans "Toggle information about how to use the WYSIWYG editor" %}
+              </span>
+            </button>
+          </h2>
+
+          <div id="wysiwyg-description">
+            <p>
+              {% blocktrans %}
+                Instead of using the "Vectors" and "Expected result" fields above
+                to define or modify the set of working vectors and expected result for this exercise,
+                you can also use the board below.
+              {% endblocktrans %}
+            </p>
+
+            <p>
+              {% blocktrans %}
+                To add a vector, left-click the board where you want the vector to originate.
+                Keep holding down the left mouse button and drag your mouse pointer across the board
+                to achieve the desired length and angle for the vector.
+                Alternatively, you can click "Create vector", which will add a new vector
+                that starts at the center of the board and has a predefined length (3) and angle (90).
+              {% endblocktrans %}
+            </p>
+
+            <p>
+              {% blocktrans %}
+                To modify the position of an existing vector, left-click it, hold down the left mouse button,
+                and move your mouse pointer across the board. To modify length and/or angle,
+                left-click the tip of the vector and drag your mouse pointer across the board.
+                Alternatively, you can select an existing vector from the dropdown menu,
+                modify its tail position, length, and angle by changing the values
+                in the corresponding input fields, and click "Update" to update its position on the board.
+                You can also modify the name and label of a vector using this technique.
+              {% endblocktrans %}
+            </p>
+
+            <p>
+              {% blocktrans %}
+                To remove an existing vector, left-click it or select it from the dropdown menu,
+                then click "Remove".
+              {% endblocktrans %}
+            </p>
+
+            <p>
+              {% blocktrans %}
+                When you are done defining the set of working vectors, click "Edit result"
+                to switch the editor to a mode that will allow you to define the expected result for this exercise.
+                In this mode you can operate on vectors as described above but you can not add or remove vectors,
+                and you may not change the name and label of a selected vector.
+              {% endblocktrans %}
+            </p>
+
+            <p>
+              {% blocktrans %}
+                To define the expected result for the exercise, place each vector where it would be located
+                in a correct solution. When a vector is selected and positioned correctly,
+                use the menu to the right of the board to select the checks that you would like the grader
+                to perform for this vector, then click "Update" to save expected position and associated checks
+                for the vector. Note that if you do not select any checks for a given vector,
+                no checks at all will be performed for it during grading (i.e., the grader will skip a presence check).
+              {% endblocktrans %}
+            </p>
+
+            <p>
+              {% blocktrans %}
+                Finally, note that if you make changes using the board below, any changes you made
+                via the "Vectors" and "Expected results" fields above will be overwritten
+                when you save the settings for this exercise by clicking the "Save" button
+                at the bottom of this dialog.
+              {% endblocktrans %}
+            </p>
+          </div>
+
+          <div id="vectordraw">
+            <div class="menu" style="width: {{ self.width }}px;">
+              <div class="controls">
+                <button class="add-vector">{% trans "Create vector" %}</button>
+                <button class="result-mode">{% trans "Edit result" %}</button>
+              </div>
+              <div class="vector-properties" aria-live="polite">
+                <h3>{{ self.vector_properties_label }}</h3>
+                <div class="vector-prop-list">
+                  <div class="row">
+                    <div class="vector-prop vector-select">
+                      <span id="vector-select-label">
+                        {% trans "vector" %}:
+                      </span>
+                      <select class="element-list-edit" aria-labelledby="vector-select-label">
+                        <option value="-" selected="selected" disabled="disabled">-</option>
+                        {% for vector in self.get_vectors %}
+                          <option value="vector-{{ forloop.counter0 }}" data-vector-name="{{ vector.name }}">
+                            {{ vector.name }}
+                          </option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="vector-prop vector-prop-name">
+                      <span id="vector-prop-name-label">
+                        {% trans "name" %}:
+                      </span>
+                      <input type="text" disabled="disabled" placeholder="-" aria-labelledby="vector-prop-name-label">
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="vector-prop vector-prop-label">
+                      <span id="vector-prop-label-label">
+                        {% trans "label" %}:
+                      </span>
+                      <input type="text" disabled="disabled" placeholder="-" aria-labelledby="vector-prop-label-label">
+                    </div>
+                    <div class="vector-prop vector-prop-tail">
+                      <span id="vector-prop-tail-label">
+                        {% trans "tail position" %}:
+                      </span>
+                      <input type="text" disabled="disabled" placeholder="-" aria-labelledby="vector-prop-tail-label">
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="vector-prop vector-prop-length">
+                      <span id="vector-prop-length-label">
+                        {% trans "length" %}:
+                      </span>
+                      <input type="text" disabled="disabled" placeholder="-" aria-labelledby="vector-prop-length-label">
+                    </div>
+                    <div class="vector-prop vector-prop-angle">
+                      <span id="vector-prop-angle-label">
+                        {% trans "angle" %}:
+                      </span>
+                      <input type="text" disabled="disabled" placeholder="-" aria-labelledby="vector-prop-angle-label">
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="vector-prop vector-prop-update">
+                      <button class="update" disabled="disabled">
+                        <span class="update-label" aria-hidden="true">{% trans "Update" %}</span>
+                        <span class="sr">{% trans "Update properties of selected element" %}</span>
+                      </button>
+                      <span class="update-pending">
+                        {% trans "Unsaved changes." %}
+                      </span>
+                      <span class="update-error">{% trans "Invalid input." %}</span>
+                    </div>
+                    <div class="vector-prop vector-remove">
+                      <button class="remove" disabled="disabled">
+                        <span class="remove-label" aria-hidden="true">{% trans "Remove" %}</span>
+                        <span class="sr">{% trans "Remove selected element" %}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="jxgboard"
+                 style="width: {{ self.width }}px; height: {{ self.height }}px;"
+                 tabindex="0">
+            </div>
+            <div class="checks" style="height: {{ self.height }}px;">
+              <h3>{% trans "Checks" %}</h3>
+              <div class="check" id="check-tail">
+                <div class="row">
+                  <span id="tail-check-label">
+                    {% trans "check tail" %}:
+                  </span>
+                  <input type="checkbox" disabled="disabled" aria-labelledby="tail-check-label">
+                </div>
+                <div class="row">
+                  <span id="tail-tolerance-label">
+                    {% trans "tolerance" %}:
+                  </span>
+                  <input type="number" disabled="disabled" min="0" step="0.1" placeholder="-" aria-labelledby="tail-tolerance-label">
+                </div>
+              </div>
+              <div class="check" id="check-tip">
+                <div class="row">
+                  <span id="tip-check-label">
+                    {% trans "check tip" %}:
+                  </span>
+                  <input type="checkbox" disabled="disabled" aria-labelledby="tip-check-label">
+                </div>
+                <div class="row">
+                  <span id="tip-tolerance-label">
+                    {% trans "tolerance" %}:
+                  </span>
+                  <input type="number" disabled="disabled" min="0" step="0.1" placeholder="-" aria-labelledby="tip-tolerance-label">
+                </div>
+              </div>
+              <div class="check" id="check-tail_x">
+                <div class="row">
+                  <span id="tail-x-check-label">
+                    {% trans "check tail(x)" %}:
+                  </span>
+                <input type="checkbox" disabled="disabled" aria-labelledby="tail-x-check-label">
+                </div>
+                <div class="row">
+                  <span id="tail-x-tolerance-label">
+                    {% trans "tolerance" %}:
+                  </span>
+                  <input type="number" disabled="disabled" min="0" step="0.1" placeholder="-" aria-labelledby="tail-x-tolerance-label">
+                </div>
+              </div>
+              <div class="check" id="check-tail_y">
+                <div class="row">
+                  <span id="tail-y-check-label">
+                    {% trans "check tail(y)" %}:
+                  </span>
+                <input type="checkbox" disabled="disabled" aria-labelledby="tail-y-check-label">
+                </div>
+                <div class="row">
+                  <span id="tail-y-tolerance-label">
+                    {% trans "tolerance" %}:
+                  </span>
+                  <input type="number" disabled="disabled" min="0" step="0.1" placeholder="-" aria-labelledby="tail-y-tolerance-label">
+                </div>
+              </div>
+              <div class="check" id="check-tip_x">
+                <div class="row">
+                  <span id="tip-x-check-label">
+                    {% trans "check tip(x)" %}:
+                  </span>
+                <input type="checkbox" disabled="disabled" aria-labelledby="tip-x-check-label">
+                </div>
+                <div class="row">
+                  <span id="tip-x-tolerance-label">
+                    {% trans "tolerance" %}:
+                  </span>
+                  <input type="number" disabled="disabled" min="0" step="0.1" placeholder="-" aria-labelledby="tip-x-tolerance-label">
+                </div>
+              </div>
+              <div class="check" id="check-tip_y">
+                <div class="row">
+                  <span id="tip-y-check-label">
+                    {% trans "check tip(y)" %}:
+                  </span>
+                <input type="checkbox" disabled="disabled" aria-labelledby="tip-y-check-label">
+                </div>
+                <div class="row">
+                  <span id="tip-y-tolerance-label">
+                    {% trans "tolerance" %}:
+                  </span>
+                  <input type="number" disabled="disabled" min="0" step="0.1" placeholder="-" aria-labelledby="tip-y-tolerance-label">
+                </div>
+              </div>
+              <div class="check" id="check-coords">
+                <div class="row">
+                  <span id="coords-check-label">
+                    {% trans "check coords" %}:
+                  </span>
+                <input type="checkbox" disabled="disabled" aria-labelledby="coords-check-label">
+                </div>
+                <div class="row">
+                  <span id="coords-tolerance-label">
+                    {% trans "tolerance" %}:
+                  </span>
+                  <input type="number" disabled="disabled" min="0" step="0.1" placeholder="-" aria-labelledby="coords-tolerance-label">
+                </div>
+              </div>
+              <div class="check" id="check-length">
+                <div class="row">
+                  <span id="length-check-label">
+                    {% trans "check length" %}:
+                  </span>
+                <input type="checkbox" disabled="disabled" aria-labelledby="length-check-label">
+                </div>
+                <div class="row">
+                  <span id="length-tolerance-label">
+                    {% trans "tolerance" %}:
+                  </span>
+                  <input type="number" disabled="disabled" min="0" step="0.1" placeholder="-" aria-labelledby="length-tolerance-label">
+                </div>
+              </div>
+              <div class="check" id="check-angle">
+                <div class="row">
+                  <span id="angle-check-label">
+                    {% trans "check angle" %}:
+                  </span>
+                <input type="checkbox" disabled="disabled" aria-labelledby="angle-check-label">
+                </div>
+                <div class="row">
+                  <span id="angle-tolerance-label">
+                    {% trans "tolerance" %}:
+                  </span>
+                  <input type="number" disabled="disabled" min="0" step="0.1" placeholder="-" aria-labelledby="angle-tolerance-label">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="xblock-actions">
+    <ul>
+      <li class="action-item">
+        <a href="#" class="button action-primary save-button">{% trans "Save" %}</a>
+      </li>
+
+      <li class="action-item">
+        <a href="#" class="button cancel-button">{% trans "Cancel" %}</a>
+      </li>
+    </ul>
+  </div>
+</div>

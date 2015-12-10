@@ -1,0 +1,172 @@
+/* CSS for VectorDrawXBlock */
+
+.vectordraw_block,
+.vectordraw_block #vectordraw {
+    display: inline-block;
+}
+
+.vectordraw_block .vectordraw-description,
+.vectordraw_block #vectordraw,
+.vectordraw_block .vectordraw-status {
+    margin-bottom: 1.5em;
+}
+
+.vectordraw_block .jxgboard {
+    float: left;
+    border: 2px solid #1f628d;
+}
+
+.vectordraw_block .jxgboard .JXGtext {
+    pointer-events: none;  /* prevents cursor from turning into caret when over a label */
+}
+
+/* Menu */
+
+.vectordraw_block .menu {
+    width: 100%;
+}
+
+.vectordraw_block .menu,
+.vectordraw_block .menu .controls {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    background-color: #e0e0e0;
+    font-size: 0;
+}
+
+.vectordraw_block .menu {
+    border-top: 2px solid #1f628d;
+    border-left: 2px solid #1f628d;
+    border-right: 2px solid #1f628d;
+}
+
+.vectordraw_block .menu .controls {
+    border-bottom: 2px solid #1f628d;
+    padding: 3px;
+}
+
+.vectordraw_block .menu .controls select {
+    width: 160px;
+    margin-right: 3px;
+    font-size: 18px;
+}
+
+.vectordraw_block .menu button {
+    border: 1px solid #1f628d;
+    border-radius: 5px;
+    margin: 4px 0;
+    padding: 5px 10px 5px 10px;
+    box-shadow: 0 1px 3px #666;
+    background-color: #c2e0f4;
+    color: #1f628d;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.vectordraw_block .menu button:focus,
+.vectordraw_block .menu button:hover {
+    background: #c2e0f4;
+    background-image: -webkit-linear-gradient(top, #c2e0f4, #add5f0);
+    background-image: -moz-linear-gradient(top, #c2e0f4, #add5f0);
+    background-image: -ms-linear-gradient(top, #c2e0f4, #add5f0);
+    background-image: -o-linear-gradient(top, #c2e0f4, #add5f0);
+    background-image: linear-gradient(to bottom, #c2e0f4, #add5f0);
+    text-decoration: none;
+}
+
+.vectordraw_block .menu .controls button.reset,
+.vectordraw_block .menu .controls button.undo,
+.vectordraw_block .menu .controls button.redo {
+    float: right;
+}
+
+.vectordraw_block .menu .vector-properties {
+    padding: 10px;
+    font-size: 16px;
+    line-height: 1.25;
+    background-color: #f7f7f7;
+}
+
+.vectordraw_block h3 {
+    font-size: 16px;
+    margin: 0 0 5px;
+}
+
+.vectordraw_block .menu .vector-properties .vector-prop-list {
+    display: table;
+    width: 100%
+}
+
+.vectordraw_block .menu .vector-properties .vector-prop-list .row {
+    display: table-row;
+}
+
+.vectordraw_block .menu .vector-properties .vector-prop-list .row .vector-prop {
+    display: table-cell;
+    width: 50%
+}
+
+.vectordraw_block .menu .vector-properties .vector-prop-list .row .vector-prop-name,
+.vectordraw_block .menu .vector-properties .vector-prop-list .row .vector-prop-tail,
+.vectordraw_block .menu .vector-properties .vector-prop-list .row .vector-prop-angle {
+    padding-right: 5px;
+}
+
+.vectordraw_block .menu .vector-properties .vector-prop-list .row span,
+.vectordraw_block .menu .vector-properties .vector-prop-list .row select,
+.vectordraw_block .menu .vector-properties .vector-prop-list .row input {
+    width: 50%;
+}
+
+.vectordraw_block .menu .vector-properties .vector-prop-list .row select,
+.vectordraw_block .menu .vector-properties .vector-prop-list .row input {
+    float: right;
+}
+
+.vectordraw_block .menu .vector-properties .vector-prop-list .row .vector-prop-update .update-error {
+    display: none;
+    color: #ff0000;
+}
+
+.vectordraw_block .menu .vector-properties button:disabled {
+    pointer-events: none;
+    border: 1px solid #707070;
+    background-color: #ececec;
+    color: #868686;
+}
+
+.vectordraw_block .action button {
+    height: 40px;
+    margin-right: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Make sure screen-reader content is hidden in the workbench: */
+.vectordraw_block .sr {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+    background: #ffffff;
+    color: #000000;
+}
+
+.vectordraw_block .vectordraw-status {
+    display: inline-block;
+    width: 100%;
+}
+
+.vectordraw_block .checkmark-correct {
+    font-size: 22pt;
+    color: #629b2b;
+}
+
+.vectordraw_block .checkmark-incorrect {
+    font-size: 22pt;
+    color: #ff0000;
+}

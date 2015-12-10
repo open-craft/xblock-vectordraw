@@ -1,0 +1,20 @@
+<vertical_demo>
+  <vectordraw url_name="vectordraw_example"
+              display_name="Custom Exercise"
+              description="Custom exercise description"
+              width="600"
+              height="450"
+              axis="false"
+              show_navigation="true"
+              show_vector_properties="{{ show_vector_properties }}"
+              show_slope_for_lines="true"
+              add_vector_label="Custom button label"
+              vector_properties_label="Custom properties label"
+              background_url="https://github.com/open-craft/jsinput-vectordraw/raw/master/Notes_and_Examples/2_boxIncline_multiVector/box_on_incline.png"
+              background_width="20"
+              background_description="A very informative description"
+              vectors="{{ vectors }}"
+              points="{{ points }}"
+              expected_result="{{ expected_result }}"
+              />
+</vertical_demo>

@@ -1,0 +1,130 @@
+{% load i18n %}
+<div class="vectordraw_block">
+
+  <h2>{{ self.display_name }}</h2>
+
+  {% if self.description %}
+    <div class="vectordraw-description">
+      {{ self.description|safe }}
+    </div>
+  {% endif %}
+
+  <div id="vectordraw">
+    <div class="menu" style="width: {{ self.width }}px;">
+      <div class="controls">
+        <label class="sr" for="element-list">{% trans "Select element to add to board" %}</label>
+        <select id="element-list" class="element-list-add">
+          {% for vector in self.get_vectors %}
+            <option value="vector-{{ forloop.counter0 }}">
+              {{ vector.description }}
+            </option>
+          {% endfor %}
+          {% for point in self.get_points %}
+            {% if not point.fixed %}
+              <option value="point-{{ forloop.counter0 }}">
+                {{ point.description }}
+              </option>
+            {% endif %}
+          {% endfor %}
+        </select>
+        <button class="add-vector">
+          {{ self.add_vector_label }}
+        </button>
+        <button class="reset">
+          <span class="reset-label" aria-hidden="true">{% trans "Reset" %}</span>
+          <span class="sr">{% trans "Reset board to initial state" %}</span>
+        </button>
+        <button class="redo" title="{% trans 'Redo' %}">
+          <span class="redo-label fa fa-repeat" aria-hidden="true"></span>
+          <span class="sr">{% trans "Redo last action" %}</span>
+        </button>
+        <button class="undo" title="{% trans 'Undo' %}">
+          <span class="undo-label fa fa-undo" aria-hidden="true"></span>
+          <span class="sr">{% trans "Undo last action" %}</span>
+        </button>
+      </div>
+      {% if self.show_vector_properties %}
+      <div class="vector-properties" aria-live="polite">
+        <h3>{{ self.vector_properties_label }}</h3>
+        <div class="vector-prop-list">
+          <div class="row">
+            <div class="vector-prop vector-prop-name">
+              <span id="vector-prop-name-label">
+                {% trans "name" %}:
+              </span>
+              <select class="element-list-edit" aria-labelledby="vector-prop-name-label">
+                <option value="-" selected="selected" disabled="disabled">-</option>
+                {% for vector in self.get_vectors %}
+                  <option value="vector-{{ forloop.counter0 }}" data-vector-name="{{ vector.name }}">
+                    {{ vector.name }}
+                  </option>
+                {% endfor %}
+                {% for point in self.get_points %}
+                  {% if not point.fixed %}
+                    <option value="point-{{ forloop.counter0 }}">
+                      {{ point.name }}
+                    </option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="vector-prop vector-prop-tail">
+              <span id="vector-prop-tail-label">
+                {% trans "tail position" %}:
+              </span>
+              <input type="text" disabled="disabled" placeholder="-" aria-labelledby="vector-prop-tail-label">
+            </div>
+            <div class="vector-prop vector-prop-length">
+              <span id="vector-prop-length-label">
+                {% trans "length" %}:
+              </span>
+              <input type="text" disabled="disabled" placeholder="-" aria-labelledby="vector-prop-length-label">
+            </div>
+          </div>
+          <div class="row">
+            <div class="vector-prop vector-prop-angle">
+              <span id="vector-prop-angle-label">
+                {% trans "angle" %}:
+              </span>
+              <input type="text" disabled="disabled" placeholder="-" aria-labelledby="vector-prop-angle-label">
+            </div>
+            <div class="vector-prop vector-prop-slope">
+              <span id="vector-prop-slope-label">
+                {% trans "slope" %}:
+              </span>
+              <input type="text" disabled="disabled" placeholder="-" aria-labelledby="vector-prop-slope-label">
+            </div>
+          </div>
+          <div class="row">
+            <div class="vector-prop vector-prop-update">
+              <button class="update" disabled="disabled">
+                <span class="update-label" aria-hidden="true">{% trans "Update" %}</span>
+                <span class="sr">{% trans "Update properties of selected element" %}</span>
+              </button>
+              <span class="update-error">{% trans "Invalid input." %}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    <div class="jxgboard"
+         style="width: {{ self.width }}px; height: {{ self.height }}px;"
+         aria-live="polite"></div>
+  </div>
+
+  <div class="vectordraw-status">
+    <span class="correctness icon-2x"></span>
+    <div class="status-message"></div>
+  </div>
+
+  <div class="action">
+    <button class="check">
+      <span class="check-label" aria-hidden="true">{% trans "Check" %}</span>
+      <span class="sr">{% trans "Check your answer" %}</span>
+    </button>
+  </div>
+
+</div>
