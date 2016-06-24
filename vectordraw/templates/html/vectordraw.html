@@ -1,6 +1,19 @@
 {% load i18n %}
 <div class="vectordraw_block">
 
+  {% if error %}
+
+  <div class="error-report">
+    <p>{% trans "Problem has an error:" %} {{ error }}</p>
+    <pre>
+      {% for line in traceback %}
+        {{ line }}
+      {% endfor %}
+    </pre>
+  </div>
+
+  {% else %}
+
   <h2>{{ self.display_name }}</h2>
 
   {% if self.description %}
@@ -126,5 +139,7 @@
       <span class="sr">{% trans "Check your answer" %}</span>
     </button>
   </div>
+
+  {% endif %}
 
 </div>

@@ -2,6 +2,8 @@
 
 import json
 import logging
+import sys
+import traceback
 
 from xblock.core import XBlock
 from xblock.exceptions import JsonHandlerError
@@ -399,25 +401,33 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         context = context or {}
         context['self'] = self
         fragment = Fragment()
-        fragment.add_content(loader.render_template('templates/html/vectordraw.html', context))
-        fragment.add_css_url(
-            "//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css"
-        )
-        fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/vectordraw.css'))
-        # Workbench doesn't have Underscore.js, so add it:
-        if WorkbenchRuntime and isinstance(self.runtime, WorkbenchRuntime):
-            fragment.add_javascript_url(
-                "//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.2/underscore-min.js"
+        try:
+            settings = self.settings
+        except Exception:
+            error_type, error, tb = sys.exc_info()
+            context['error'] = error
+            context['traceback'] = traceback.format_tb(tb)
+        else:
+            fragment.add_css_url(
+                "//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css"
             )
-        fragment.add_javascript_url(
-            "//cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.98/jsxgraphcore.js"
-        )
-        fragment.add_javascript_url(
-            self.runtime.local_resource_url(self, 'public/js/vectordraw.js')
-        )
-        fragment.initialize_js(
-            'VectorDrawXBlock', {"settings": self.settings, "user_state": self.user_state}
-        )
+            fragment.add_css_url(self.runtime.local_resource_url(self, 'public/css/vectordraw.css'))
+            # Workbench doesn't have Underscore.js, so add it:
+            if WorkbenchRuntime and isinstance(self.runtime, WorkbenchRuntime):
+                fragment.add_javascript_url(
+                    "//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.2/underscore-min.js"
+                )
+            fragment.add_javascript_url(
+                "//cdnjs.cloudflare.com/ajax/libs/jsxgraph/0.98/jsxgraphcore.js"
+            )
+            fragment.add_javascript_url(
+                self.runtime.local_resource_url(self, 'public/js/vectordraw.js')
+            )
+            fragment.initialize_js(
+                'VectorDrawXBlock', {"settings": settings, "user_state": self.user_state}
+            )
+        finally:
+            fragment.add_content(loader.render_template('templates/html/vectordraw.html', context))
         return fragment
 
     def studio_view(self, context):
