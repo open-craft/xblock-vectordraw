@@ -446,6 +446,13 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
             field_info = self._make_field_info(field_name, field)
             if field_info is not None:
                 context["fields"].append(field_info)
+        try:
+            settings = self.settings
+        except Exception:
+            error_type, error, tb = sys.exc_info()
+            context['error'] = error
+            context['traceback'] = traceback.format_tb(tb)
+            settings = None
         fragment.add_content(loader.render_template("templates/html/vectordraw_edit.html", context))
         # Add resources to studio_view fragment
         fragment.add_css_url(
@@ -464,7 +471,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
             self.runtime.local_resource_url(self, 'public/js/vectordraw_edit.js')
         )
         fragment.initialize_js(
-            'VectorDrawXBlockEdit', {"settings": self.settings}
+            'VectorDrawXBlockEdit', {"settings": settings}
         )
         return fragment
 

@@ -61,6 +61,15 @@
           {% endif %}
         </li>
       {% endfor %}
+
+      {% if error %}
+
+      <div class="error-report">
+        <p>{% trans "Not displaying WYSIWYG editor: Problem contains invalid settings. Please fix them using the fields above." %}</p>
+      </div>
+
+      {% else %}
+
       <li>
         <!-- WYSIWYG editor -->
         <div class="vectordraw_block vectordraw_edit_block">
@@ -358,6 +367,9 @@
           </div>
         </div>
       </li>
+
+      {% endif %}
+
     </ul>
   </div>
 

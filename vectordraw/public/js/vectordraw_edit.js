@@ -686,13 +686,16 @@ function VectorDrawXBlockEdit(runtime, element, init_args) {
     var fieldEditor = StudioEditableXBlockMixin(runtime, element);
 
     // Initialize WYSIWYG editor
-    var vectordraw = new VectorDraw('vectordraw', init_args.settings);
+    var vectordraw;
+    if (init_args.settings) {
+        vectordraw = new VectorDraw('vectordraw', init_args.settings);
+    }
 
     // Set up click handlers
     $('.save-button', element).on('click', function(e) {
         e.preventDefault();
         var data = {};
-        if (vectordraw.wasUsed) {
+        if (vectordraw && vectordraw.wasUsed) {
             // If author edited both initial state and result,
             // vectordraw.settings.vectors corresponds to state vectors were in
             // when author switched to result mode
