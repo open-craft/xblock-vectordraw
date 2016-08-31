@@ -36,5 +36,5 @@ setup(
             'vectordraw = vectordraw:VectorDrawXBlock',
         ]
     },
-    package_data=package_data("vectordraw", ["static", "public"]),
+    package_data=package_data("vectordraw", ["static", "public", "templates"]),
 )
