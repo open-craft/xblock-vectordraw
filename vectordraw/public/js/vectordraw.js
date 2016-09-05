@@ -409,7 +409,7 @@ function VectorDrawXBlock(runtime, element, init_args) {
         return true;
     };
 
-    VectorDraw.prototype.objectsUnderMouse = function(){
+    VectorDraw.prototype.objectsUnderMouse = function() {
         var targetObjects = [];
         var highlightedObjects = this.board.highlightedObjects
         var keys = Object.keys(highlightedObjects);
@@ -424,7 +424,7 @@ function VectorDrawXBlock(runtime, element, init_args) {
         // Can't create a vector if none is selected from the list.
         var selected = this.getSelectedElement();
         var coords = this.getMouseCoords(evt);
-        var targetObjects = this.objectsUnderMouse(coords);
+        var targetObjects = this.objectsUnderMouse();
         if (!_.isEmpty(selected) && (!targetObjects || _.all(targetObjects, this.canCreateVectorOnTopOf.bind(this)))) {
             var point_coords = [coords.usrCoords[1], coords.usrCoords[2]];
             if (selected.type === 'vector') {
