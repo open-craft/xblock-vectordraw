@@ -419,8 +419,9 @@ function VectorDrawXBlock(runtime, element, init_args) {
         return targetObjects
     }
 
+    // for disabling scroll http://stackoverflow.com/a/4770179/2747370
     VectorDraw.prototype.preventDefault = function(e) {
-        // for disabling scroll http://stackoverflow.com/a/4770179/2747370
+        // Run preventDefault() on the event if the browser supports it, otherwise return false.
         e = e || window.event;
         if (e.preventDefault){
             e.preventDefault();
@@ -429,7 +430,7 @@ function VectorDrawXBlock(runtime, element, init_args) {
     }
 
     VectorDraw.prototype.preventDefaultForScrollKeys = function(e) {
-        // for disabling scroll http://stackoverflow.com/a/4770179/2747370
+        // Prevent the default behavior (scrolling) when pressing the arrow keys.
         var keys = {37: 1, 38: 1, 39: 1, 40: 1};
         if (keys[e.keyCode]) {
             this.preventDefault(e);
@@ -438,7 +439,7 @@ function VectorDrawXBlock(runtime, element, init_args) {
     }
 
     VectorDraw.prototype.disableScroll = function() {
-        // for disabling scroll http://stackoverflow.com/a/4770179/2747370
+        // Disable scrolling until enable scrolling is called.
         var preventDefault = this.preventDefault;
         var preventDefaultForScrollKeys = this.preventDefaultForScrollKeys;
         if (window.addEventListener){ // older FF
@@ -451,9 +452,8 @@ function VectorDrawXBlock(runtime, element, init_args) {
     }
 
     VectorDraw.prototype.enableScroll = function() {
-        // for disabling scroll http://stackoverflow.com/a/4770179/2747370
+        // Enable scrolling (undo the changes of disableScroll).
         var preventDefault = this.preventDefault;
-        var preventDefaultForScrollKeys = this.preventDefaultForScrollKeys;
         if (window.removeEventListener){
             window.removeEventListener('DOMMouseScroll', preventDefault, false);
         }
