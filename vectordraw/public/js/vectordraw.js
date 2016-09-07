@@ -419,6 +419,50 @@ function VectorDrawXBlock(runtime, element, init_args) {
         return targetObjects
     }
 
+    // for disabling scroll http://stackoverflow.com/a/4770179/2747370
+    VectorDraw.prototype.preventDefault = function(e) {
+        // Run preventDefault() on the event if the browser supports it, otherwise return false.
+        e = e || window.event;
+        if (e.preventDefault){
+            e.preventDefault();
+        }
+        e.returnValue = false;
+    }
+
+    VectorDraw.prototype.preventDefaultForScrollKeys = function(e) {
+        // Prevent the default behavior (scrolling) when pressing the arrow keys.
+        var keys = {37: 1, 38: 1, 39: 1, 40: 1};
+        if (keys[e.keyCode]) {
+            this.preventDefault(e);
+            return false;
+        }
+    }
+
+    VectorDraw.prototype.disableScroll = function() {
+        // Disable scrolling until enable scrolling is called.
+        var preventDefault = this.preventDefault;
+        var preventDefaultForScrollKeys = this.preventDefaultForScrollKeys;
+        if (window.addEventListener){ // older FF
+            window.addEventListener('DOMMouseScroll', preventDefault, false);
+        }
+        window.onwheel = preventDefault; // modern standard
+        window.onmousewheel = document.onmousewheel = preventDefault; // older browsers, IE
+        window.ontouchmove  = preventDefault; // mobile
+        document.onkeydown  = preventDefaultForScrollKeys;
+    }
+
+    VectorDraw.prototype.enableScroll = function() {
+        // Enable scrolling (undo the changes of disableScroll).
+        var preventDefault = this.preventDefault;
+        if (window.removeEventListener){
+            window.removeEventListener('DOMMouseScroll', preventDefault, false);
+        }
+        window.onmousewheel = document.onmousewheel = null;
+        window.onwheel = null;
+        window.ontouchmove = null;
+        document.onkeydown = null;
+    }
+
     VectorDraw.prototype.onBoardDown = function(evt) {
         this.pushHistory();
         // Can't create a vector if none is selected from the list.
@@ -429,6 +473,7 @@ function VectorDrawXBlock(runtime, element, init_args) {
             var point_coords = [coords.usrCoords[1], coords.usrCoords[2]];
             if (selected.type === 'vector') {
                 this.drawMode = true;
+                this.disableScroll();
                 this.dragged_vector = this.renderVector(selected.idx, [point_coords, point_coords]);
             } else {
                 this.renderPoint(selected.idx, point_coords);
@@ -458,6 +503,7 @@ function VectorDrawXBlock(runtime, element, init_args) {
     };
 
     VectorDraw.prototype.onBoardUp = function(evt) {
+        this.enableScroll();
         this.drawMode = false;
         if (this.dragged_vector && !this.isVectorTailDraggable(this.dragged_vector)) {
             this.dragged_vector.point1.setProperty({fixed: true});
