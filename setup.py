@@ -22,7 +22,7 @@ def package_data(pkg, roots):
 
 setup(
     name='vectordraw-xblock',
-    version='0.1',
+    version='0.2',
     description='vectordraw XBlock',   # TODO: write a better description.
     packages=[
         'vectordraw',
