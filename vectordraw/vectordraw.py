@@ -31,6 +31,8 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
     An XBlock that allows course authors to define vector drawing exercises.
     """
 
+    icon_class = "problem"
+
     # Content
     display_name = String(
         display_name="Title (display name)",
