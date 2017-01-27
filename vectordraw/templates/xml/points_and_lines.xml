@@ -1,0 +1,13 @@
+<vertical_demo>
+  <vectordraw url_name="points_and_lines"
+              description="&lt;p&gt;A car is moving in the positive x-direction and is slowing down. Draw the appropriate free-body diagram for this situation. You can create a draggable vector by clicking one of the buttons to the right of the interactive canvas.&lt;/p&gt;&lt;p&gt;&lt;i&gt;Be sure that the &quot;tail&quot; of each vector starts at the center of mass.&lt;/i&gt; Also try to break this - I have error messages for most possible situations.&lt;/p&gt;"
+              width="550"
+              height="450"
+              bounding_box_size="8"
+              background_url="https://raw.githubusercontent.com/open-craft/jsinput-vectordraw/master/simple_car.png"
+              background_width="20"
+              vectors="[{&quot;name&quot;: &quot;line1&quot;, &quot;type&quot;: &quot;line&quot;,  &quot;description&quot;: &quot;Line #1&quot;, &quot;coords&quot;: [[0, 0], [3, 3]], &quot;render&quot;: false}]"
+              points="[{&quot;name&quot;: &quot;cm&quot;, &quot;coords&quot;: [0, -0.75], &quot;fixed&quot;: true},{&quot;name&quot;: &quot;dp&quot;, &quot;coords&quot;: [0, -0.75], &quot;fixed&quot;: false, &quot;description&quot;: &quot;A point to be set by student&quot;,&quot;render&quot;: false, &quot;style&quot;: {&quot;color&quot;: &quot;#ff00ff&quot;, &quot;size&quot;: 2}}]"
+              expected_results="{&quot;line1&quot;: {&quot;coords&quot;: [[0, 0], [3, 3]]},&quot;point_coords&quot;: {&quot;dp&quot;: [0, 0]}}"
+              />
+</vertical_demo>
