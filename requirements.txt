@@ -1,3 +1,3 @@
+-e git+https://github.com/edx/XBlock.git@1.2.9#egg=XBlock
 xblock-utils==1.2.2
-xblock==1.2.9
 -e .

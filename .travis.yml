@@ -10,8 +10,9 @@ install:
   - pip install -r $VIRTUAL_ENV/src/xblock-sdk/requirements/base.txt
   - pip install -r $VIRTUAL_ENV/src/xblock-sdk/requirements/test.txt
   - pip install -r $VIRTUAL_ENV/src/xblock/requirements/base.txt
+  - pip install -r $VIRTUAL_ENV/src/xblock/requirements/test.txt
 script:
-  - pep8 --max-line-length=100 vectordraw
+  - pycodestyle --max-line-length=100 vectordraw
   - pylint vectordraw
   - ./run_tests.py --with-coverage --cover-package=vectordraw
 notifications:
