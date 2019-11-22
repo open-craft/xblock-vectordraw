@@ -1,8 +1,14 @@
+from __future__ import absolute_import
+
 import json
 
 from ddt import ddt, data
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
+from six.moves import zip
 from xblockutils.resources import ResourceLoader
 from xblockutils.studio_editable_test import StudioEditableBaseTest
 
@@ -70,6 +76,11 @@ class TestVectorDraw(StudioEditableBaseTest):
 
     def assert_background(self, board, is_present=False):
         if is_present:
+            wait = WebDriverWait(board, self.timeout)
+            wait.until(
+                EC.presence_of_element_located((By.TAG_NAME, "image")),
+                'Timeout while waiting for "image" element.'
+            )
             background = board.find_element_by_css_selector("image")
             self.assertTrue(background.is_displayed())
             src = background.get_attribute("xlink:href")
@@ -287,24 +298,24 @@ class TestVectorDraw(StudioEditableBaseTest):
         return aria_describedby == "jxgboard1-vector-properties"
 
     def find_line(self, position, line_elements):
-        expected_line_position = position.items()
+        expected_line_position = list(position.items())
         for line in line_elements:
-            line_position = {
+            line_position = list({
                 "x1": int(line.get_attribute("x1").split(".", 1)[0]),
                 "y1": int(line.get_attribute("y1").split(".", 1)[0]),
                 "x2": int(line.get_attribute("x2").split(".", 1)[0]),
                 "y2": int(line.get_attribute("y2").split(".", 1)[0]),
-            }.items()
+            }.items())
             if line_position == expected_line_position:
                 return line
 
     def find_point(self, position, point_elements):
-        expected_position = position.items()
+        expected_position = list(position.items())
         for point in point_elements:
-            point_position = {
+            point_position = list({
                 "cx": int(point.get_attribute("cx").split(".", 1)[0]),
                 "cy": int(point.get_attribute("cy").split(".", 1)[0]),
-            }.items()
+            }.items())
             if point_position == expected_position:
                 return point
 

@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import unittest
 from vectordraw import grader
 from vectordraw.grader import Vector
@@ -31,7 +33,11 @@ class VectorDrawTest(unittest.TestCase):
         try:
             check_function(check, vectors)
         except ValueError as e:
-            self.assertEquals(e.message, error_message)
+            if hasattr(e, 'message'):  # Python 2
+                msg = e.message
+            else:  # Python 3
+                msg = str(e)
+            self.assertEquals(msg, error_message)
         else:
             self.fail('{check_function} should raise an error for check {check} and vectors {vectors}.'.format(
                 check_function=check_function.__name__, check=check, vectors=vectors

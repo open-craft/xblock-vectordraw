@@ -32,9 +32,13 @@ It uses the following data structures:
 
 # pylint: disable=invalid-name
 
+from __future__ import absolute_import
+
+import sys
 import inspect
 import logging
 import math
+import six
 
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -162,9 +166,10 @@ def _coord_delta(expected, actual):
     Return distance between `expected` and `actual` coordinates.
     """
     if expected == '_':
-        return 0
+        distance = 0
     else:
-        return expected - actual
+        distance = expected - actual
+    return distance
 
 
 def _coords_within_tolerance(vec, expected, tolerance):
@@ -293,7 +298,9 @@ def check_point_coords(check, points):
     expected = check['expected']
     dist = math.hypot(expected[0] - point.x, expected[1] - point.y)
     if dist > tolerance:
-        return _errmsg_point('Point {name} is not at the correct location.', check, point)
+        raise ValueError(_errmsg_point(
+            'Point {name} is not at the correct location.', check, point
+        ))
 
 
 class Point(object):
@@ -359,13 +366,23 @@ class Grader(object):
             points=self._get_points(answer),
         )
         for check in answer['checks']:
+            # pylint: disable=deprecated-method
             check_data['check'] = check
             check_fn = self.check_registry[check['check']]
-            args = [check_data[arg] for arg in inspect.getargspec(check_fn).args]
+            # getargspec was deprecated in python3, and apparently
+            # getfullargspec isn't right for this use case
+            if sys.version_info >= (3, 0):
+                args = [check_data[param] for param in inspect.signature(check_fn).parameters]
+            else:
+                args = [check_data[arg] for arg in inspect.getargspec(check_fn).args]
             try:
                 check_fn(*args)
             except ValueError as e:
-                return {'correct': False, 'msg': e.message}
+                if hasattr(e, 'message'):  # Python 2
+                    msg = e.message
+                else:  # Python 3
+                    msg = str(e)
+                return {'correct': False, 'msg': msg}
         return {'correct': True, 'msg': self.success_message}
 
     def _get_vectors(self, answer):  # pylint: disable=no-self-use
@@ -373,7 +390,7 @@ class Grader(object):
         Turn vector info in `answer` into a dictionary of Vector objects.
         """
         vectors = {}
-        for name, props in answer['vectors'].iteritems():
+        for name, props in six.iteritems(answer['vectors']):
             tail = props['tail']
             tip = props['tip']
             vectors[name] = Vector(name, tail[0], tail[1], tip[0], tip[1])
@@ -383,4 +400,4 @@ class Grader(object):
         """
         Turn point info in `answer` into a dictionary of Point objects.
         """
-        return {name: Point(*coords) for name, coords in answer['points'].iteritems()}
+        return {name: Point(*coords) for name, coords in six.iteritems(answer['points'])}

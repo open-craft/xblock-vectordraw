@@ -1,8 +1,11 @@
 """An XBlock that allows course authors to define vector drawing exercises."""
 
+from __future__ import absolute_import
+
 import json
 import logging
 
+import six
 from xblock.core import XBlock
 from xblock.exceptions import JsonHandlerError
 from xblock.fields import Scope, Boolean, Dict, Float, Integer, String
@@ -429,7 +432,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         for field_name in self.editable_fields:
             if field_name == "expected_result_positions":
                 continue
-            field = self.fields[field_name]
+            field = self.fields[field_name]  # pylint: disable=unsubscriptable-object
             assert field.scope in (Scope.content, Scope.settings), (
                 "Only Scope.content or Scope.settings fields can be used with "
                 "StudioEditableXBlockMixin. Other scopes are for user-specific data and are "
@@ -496,7 +499,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
             raise ValueError
         for vector_data in vectors.values():
             # Validate vector
-            if not vector_data.viewkeys() == {'tail', 'tip'}:
+            if not six.viewkeys(vector_data) == {'tail', 'tip'}:
                 raise ValueError
             # Validate tip and tail
             tip = vector_data['tip']

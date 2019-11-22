@@ -1,5 +1,7 @@
 """Setup for vectordraw XBlock."""
 
+from __future__ import absolute_import
+
 import os
 from setuptools import setup
 
@@ -22,8 +24,13 @@ def package_data(pkg, roots):
 
 setup(
     name='vectordraw-xblock',
-    version='0.2.1',
+    version='0.3.0',
     description='vectordraw XBlock',   # TODO: write a better description.
+    url='https://github.com/open-craft/xblock-vectordraw',
+    classifiers=[
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3'
+    ],
     packages=[
         'vectordraw',
     ],
@@ -33,7 +40,7 @@ setup(
     ],
     entry_points={
         'xblock.v1': [
-            'vectordraw = vectordraw:VectorDrawXBlock',
+            'vectordraw = vectordraw.vectordraw:VectorDrawXBlock',
         ]
     },
     package_data=package_data("vectordraw", ["static", "public", "templates"]),
