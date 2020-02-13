@@ -4,6 +4,7 @@ import json
 
 from ddt import ddt, data
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -21,8 +22,12 @@ class TestVectorDraw(StudioEditableBaseTest):
     Test student view of VectorDrawXBlock.
     """
 
+    def setUp(self):
+        super(TestVectorDraw, self).setUp()
+        self.driver.implicitly_wait(3)
+
     def load_scenario(self, path, params=None):
-        scenario = loader.render_template(path, params)
+        scenario = loader.render_django_template(path, params)
         self.set_scenario_xml(scenario)
         self.element = self.go_to_view("student_view")
         self.exercise = self.element.find_element_by_css_selector(".vectordraw_block")
@@ -297,25 +302,23 @@ class TestVectorDraw(StudioEditableBaseTest):
         aria_describedby = line.get_attribute("aria-describedby")
         return aria_describedby == "jxgboard1-vector-properties"
 
-    def find_line(self, position, line_elements):
-        expected_line_position = list(position.items())
+    def find_line(self, expected_line_position, line_elements):
         for line in line_elements:
-            line_position = list({
+            line_position = {
                 "x1": int(line.get_attribute("x1").split(".", 1)[0]),
                 "y1": int(line.get_attribute("y1").split(".", 1)[0]),
                 "x2": int(line.get_attribute("x2").split(".", 1)[0]),
                 "y2": int(line.get_attribute("y2").split(".", 1)[0]),
-            }.items())
+            }
             if line_position == expected_line_position:
                 return line
 
-    def find_point(self, position, point_elements):
-        expected_position = list(position.items())
+    def find_point(self, expected_position, point_elements):
         for point in point_elements:
-            point_position = list({
+            point_position = {
                 "cx": int(point.get_attribute("cx").split(".", 1)[0]),
                 "cy": int(point.get_attribute("cy").split(".", 1)[0]),
-            }.items())
+            }
             if point_position == expected_position:
                 return point
 
@@ -571,18 +574,23 @@ class TestVectorDraw(StudioEditableBaseTest):
         if click_target == "line":
             # Find line and click it
             line_elements = board.find_elements_by_css_selector("line")
-            line = self.find_line(vector["expected_line_position"], line_elements)
-            line.click()
+            elem = self.find_line(vector["expected_line_position"], line_elements)
         elif click_target == "tail":
             # Find tail and click it
             point_elements = board.find_elements_by_css_selector("ellipse")
-            tail = self.find_point(vector["expected_tail_position"], point_elements)
-            tail.click()
+            elem = self.find_point(vector["expected_tail_position"], point_elements)
         else:
             # Find tip and click it
             point_elements = board.find_elements_by_css_selector("ellipse")
-            tip = self.find_point(vector["expected_tip_position"], point_elements)
-            tip.click()
+            elem = self.find_point(vector["expected_tip_position"], point_elements)
+
+        # XXX: potential a11y issue here. Clicking on the vector parts to
+        # activate the action only works if hovering with the cursor before
+        # clicking. This could prevent keyboard-only use.
+        hover = ActionChains(self.driver)
+        hover.move_to_element(elem).perform()
+        elem.click()
+
         # Check if "Vector Properties" shows correct info
         menu = self.exercise.find_element_by_css_selector(".menu")
         self.assert_vector_properties(

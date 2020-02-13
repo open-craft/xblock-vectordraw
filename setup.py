@@ -24,7 +24,7 @@ def package_data(pkg, roots):
 
 setup(
     name='vectordraw-xblock',
-    version='0.3.0',
+    version='0.3.1',
     description='vectordraw XBlock',   # TODO: write a better description.
     url='https://github.com/open-craft/xblock-vectordraw',
     license = 'AGPLv3',
