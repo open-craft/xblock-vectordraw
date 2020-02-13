@@ -27,9 +27,11 @@ setup(
     version='0.3.0',
     description='vectordraw XBlock',   # TODO: write a better description.
     url='https://github.com/open-craft/xblock-vectordraw',
+    license = 'AGPLv3',
     classifiers=[
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3'
+        'Programming Language :: Python :: 3',
+        'License :: OSI Approved :: GNU Affero General Public License v3',
     ],
     packages=[
         'vectordraw',
