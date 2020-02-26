@@ -404,7 +404,9 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         context = context or {}
         context['self'] = self
         fragment = Fragment()
-        fragment.add_content(loader.render_template('templates/html/vectordraw.html', context))
+        fragment.add_content(
+            loader.render_django_template('templates/html/vectordraw.html', context)
+        )
         fragment.add_css_url(
             "//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css"
         )
@@ -441,7 +443,9 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
             field_info = self._make_field_info(field_name, field)
             if field_info is not None:
                 context["fields"].append(field_info)
-        fragment.add_content(loader.render_template("templates/html/vectordraw_edit.html", context))
+        fragment.add_content(
+            loader.render_django_template("templates/html/vectordraw_edit.html", context)
+        )
         # Add resources to studio_view fragment
         fragment.add_css_url(
             self.runtime.local_resource_url(self, 'public/css/vectordraw.css')
