@@ -1,8 +1,9 @@
-Django>=1.8, <2.0
+Django>=1.8, <2.0; python_version == '2.7'
+Django>=2.2, <3.0; python_version > '2.7'
 
 -r requirements.txt
 
--e git+https://github.com/edx/xblock-sdk.git@v0.1.6#egg=xblock-sdk
+-e git+https://github.com/edx/xblock-sdk.git@0.2.2#egg=xblock-sdk
 
 ddt
 pycodestyle
