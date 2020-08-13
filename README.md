@@ -1,5 +1,7 @@
 # Vectordraw XBlock
 
+![Travis CI](https://travis-ci.org/open-craft/xblock-vectordraw.svg?branch=master)
+
 ## Installation
 
 1. Install this module in the python environment for studio and lms.
