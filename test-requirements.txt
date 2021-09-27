@@ -7,5 +7,5 @@ Django>=2.2, <3.3; python_version > '2.7'
 
 ddt
 pycodestyle
-pylint==1.9.5
+pylint
 selenium==3.4.1
