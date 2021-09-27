@@ -1,0 +1,40 @@
+version: 2.1
+
+jobs:
+  test-py36-django22:
+    docker:
+      - image: cimg/python:3.6
+    steps:
+      - checkout
+      - run:
+          name: Install tox
+          command: |
+            pip install tox
+      - run:
+          name: Run tests
+          command: |
+            pycodestyle --max-line-length=100 vectordraw
+            pylint vectordraw
+            tox -e py36-django22
+  test-py36-django32:
+    docker:
+      - image: cimg/python:3.8
+    steps:
+      - checkout
+      - run:
+          name: Install tox
+          command: |
+            pip install tox
+      - run:
+          name: Run tests
+          command: |
+            pycodestyle --max-line-length=100 vectordraw
+            pylint vectordraw
+            tox -e py38-django32
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - test-py36-django22
+      - test-py36-django32
