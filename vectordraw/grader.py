@@ -96,7 +96,7 @@ def _check_vector_endpoint(check, vectors, endpoint):
     dist = math.hypot(expected[0] - endpoint.x, expected[1] - endpoint.y)
     if dist > tolerance:
         raise ValueError(_errmsg(
-            'Vector {name} does not {verb} at correct point.'.format(name='{name}', verb=verb),
+            f"Vector '{{name}}' does not {verb} at correct point.",
             check,
             vectors
         ))
@@ -303,14 +303,14 @@ def check_point_coords(check, points):
         ))
 
 
-class Point(object):
+class Point:
     """ Represents a single point on the vector drawing board. """
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
 
-class Vector(object):
+class Vector:
     """ Represents a single vector on the vector drawing board. """
     def __init__(self, name, x1, y1, x2, y2):  # pylint: disable=too-many-arguments
         self.name = name
@@ -329,7 +329,7 @@ class Vector(object):
         return Vector(self.name, self.tip.x, self.tip.y, self.tail.x, self.tail.y)
 
 
-class Grader(object):
+class Grader:
     """
     Implements grading logic for student answers to Vector Drawing exercises.
     """

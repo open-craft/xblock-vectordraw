@@ -8,7 +8,7 @@ def get_doc_link(section, link_text="here"):
     Return link to specific `section` of README for Vector Drawing exercises.
     """
     return (
-        '<a href="https://github.com/open-craft/jsinput-vectordraw#{section}" target="_blank">'
-        '{link_text}'
-        '</a>'
+        f'<a href="https://github.com/open-craft/jsinput-vectordraw#{section}" target="_blank">'
+        f'{link_text}'
+        f'</a>'
     ).format(section=section, link_text=link_text)
