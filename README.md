@@ -10,4 +10,4 @@
 
 ## Testing
 
-1. For running the tests on Python 3.6 and Django versions 2.2 and 3.2 use the command `tox`
+1. For running the tests use the command `tox`

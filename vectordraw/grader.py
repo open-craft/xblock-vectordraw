@@ -96,7 +96,7 @@ def _check_vector_endpoint(check, vectors, endpoint):
     dist = math.hypot(expected[0] - endpoint.x, expected[1] - endpoint.y)
     if dist > tolerance:
         raise ValueError(_errmsg(
-            f"Vector '{{name}}' does not {verb} at correct point.",
+            f"Vector {{name}} does not {verb} at correct point.",
             check,
             vectors
         ))
