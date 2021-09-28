@@ -11,4 +11,4 @@ def get_doc_link(section, link_text="here"):
         f'<a href="https://github.com/open-craft/jsinput-vectordraw#{section}" target="_blank">'
         f'{link_text}'
         f'</a>'
-    ).format(section=section, link_text=link_text)
+    )
