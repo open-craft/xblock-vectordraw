@@ -159,14 +159,14 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
     vectors = String(
         display_name="Vectors",
         help=(
-            "List of vectors to use for the exercise. "
-            "You must specify it as an array of entries "
-            "where each entry represents an individual vector. "
-            "See {doc_link} for more information. "
-            "Note that you can also use the WYSIWYG editor below to create or modify vectors. "
-            "If you do, any changes you make here will be overwritten by vector data "
-            "from the WYSIWYG editor when saving."
-        ).format(doc_link=get_doc_link('vectors')),
+            f"List of vectors to use for the exercise. "
+            f"You must specify it as an array of entries "
+            f"where each entry represents an individual vector. "
+            f"See {get_doc_link('vectors')} for more information. "
+            f"Note that you can also use the WYSIWYG editor below to create or modify vectors. "
+            f"If you do, any changes you make here will be overwritten by vector data "
+            f"from the WYSIWYG editor when saving."
+        ),
         default="[]",
         multiline_editor=True,
         resettable_editor=False,
@@ -176,11 +176,12 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
     points = String(
         display_name="Points",
         help=(
-            "List of points to be drawn on the board for reference, or to be placed by the student."
-            "You must specify it as an array of entries "
-            "where each entry represents an individual point. "
-            "See {doc_link} for more information."
-        ).format(doc_link=get_doc_link('points')),
+            f"List of points to be drawn on the board for reference, "
+            f"or to be placed by the student."
+            f"You must specify it as an array of entries "
+            f"where each entry represents an individual point. "
+            f"See {get_doc_link('points')} for more information."
+        ),
         default="[]",
         multiline_editor=True,
         resettable_editor=False,
@@ -190,17 +191,18 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
     expected_result = String(
         display_name="Expected result",
         help=(
-            "Defines vector properties for grading. "
-            "You must specify it as a JSON object where each key is the name of an existing vector "
-            "and each value is a JSON object containing information about checks to perform "
-            "and expected values. "
-            "See {doc_link} for more information. "
-            "Vectors omitted from this setting are ignored when grading. "
-            "Note that you can also use the WYSIWYG editor below to opt in and out of checks "
-            "for individual vectors. "
-            "If you use the WYSIWYG editor at all, any changes you make here "
-            "will be overwritten when saving."
-        ).format(doc_link=get_doc_link('expected_result')),
+            f"Defines vector properties for grading. "
+            f"You must specify it as a JSON object"
+            f"where each key is the name of an existing vector "
+            f"and each value is a JSON object containing information about checks to perform "
+            f"and expected values. "
+            f"See {get_doc_link('expected_result')} for more information. "
+            f"Vectors omitted from this setting are ignored when grading. "
+            f"Note that you can also use the WYSIWYG editor below to opt in and out of checks "
+            f"for individual vectors. "
+            f"If you use the WYSIWYG editor at all, any changes you make here "
+            f"will be overwritten when saving."
+        ),
         default="{}",
         multiline_editor=True,
         resettable_editor=False,
@@ -471,7 +473,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         """
         Validate this block's field data.
         """
-        super(VectorDrawXBlock, self).validate_field_data(validation, data)
+        super().validate_field_data(validation, data)
 
         def add_error(msg):
             """ Helper function for adding validation messages. """
@@ -480,13 +482,13 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         if data.background_url.strip():
             if data.background_width == 0 and data.background_height == 0:
                 add_error(
-                    u"You specified a background image but no width or height. "
+                    "You specified a background image but no width or height. "
                     "For the image to display, you need to specify a non-zero value "
                     "for at least one of them."
                 )
             if not data.background_description.strip():
                 add_error(
-                    u"No background description set. "
+                    "No background description set. "
                     "This means that it will be more difficult for non-visual users "
                     "to solve the problem. "
                     "Please provide a description that contains sufficient information "
@@ -534,8 +536,8 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         # Validate data
         try:
             self._validate_check_answer_data(data)
-        except ValueError:
-            raise JsonHandlerError(400, "Invalid data")
+        except ValueError as error:
+            raise JsonHandlerError(400, "Invalid data") from error
         # Save answer
         self.answer = dict(
             vectors=data["vectors"],
