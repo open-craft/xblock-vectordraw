@@ -6,10 +6,10 @@ import json
 import logging
 
 import six
+from web_fragments.fragment import Fragment
 from xblock.core import XBlock
 from xblock.exceptions import JsonHandlerError
-from xblock.fields import Scope, Boolean, Dict, Float, Integer, String
-from xblock.fragment import Fragment
+from xblock.fields import Boolean, Dict, Float, Integer, Scope, String
 from xblock.validation import ValidationMessage
 from xblockutils.resources import ResourceLoader
 from xblockutils.studio_editable import StudioEditableXBlockMixin
@@ -22,7 +22,6 @@ except ImportError:
 
 from .grader import Grader
 from .utils import get_doc_link
-
 
 loader = ResourceLoader(__name__)  # pylint: disable=invalid-name
 
