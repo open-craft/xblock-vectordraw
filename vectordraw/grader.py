@@ -361,10 +361,7 @@ class Grader:
 
         Short-circuit as soon as a single check fails.
         """
-        check_data = dict(
-            vectors=self._get_vectors(answer),
-            points=self._get_points(answer),
-        )
+        check_data = {'vectors': self._get_vectors(answer), 'points': self._get_points(answer)}
         for check in answer['checks']:
             # pylint: disable=deprecated-method
             check_data['check'] = check
@@ -385,7 +382,7 @@ class Grader:
                 return {'correct': False, 'msg': msg}
         return {'correct': True, 'msg': self.success_message}
 
-    def _get_vectors(self, answer):  # pylint: disable=no-self-use
+    def _get_vectors(self, answer):
         """
         Turn vector info in `answer` into a dictionary of Vector objects.
         """
@@ -396,7 +393,7 @@ class Grader:
             vectors[name] = Vector(name, tail[0], tail[1], tip[0], tip[1])
         return vectors
 
-    def _get_points(self, answer):  # pylint: disable=no-self-use
+    def _get_points(self, answer):
         """
         Turn point info in `answer` into a dictionary of Point objects.
         """

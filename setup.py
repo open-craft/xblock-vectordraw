@@ -1,8 +1,8 @@
 """Setup for vectordraw XBlock."""
 
-from __future__ import absolute_import
 
 import os
+
 from setuptools import setup
 
 
@@ -27,9 +27,8 @@ setup(
     version='0.4.0',
     description='vectordraw XBlock',   # TODO: write a better description.
     url='https://github.com/open-craft/xblock-vectordraw',
-    license = 'AGPLv3',
+    license='AGPLv3',
     classifiers=[
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: GNU Affero General Public License v3',
     ],

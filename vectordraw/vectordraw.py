@@ -1,15 +1,14 @@
 """An XBlock that allows course authors to define vector drawing exercises."""
 
-from __future__ import absolute_import
 
 import json
 import logging
 
 import six
+from web_fragments.fragment import Fragment
 from xblock.core import XBlock
 from xblock.exceptions import JsonHandlerError
-from xblock.fields import Scope, Boolean, Dict, Float, Integer, String
-from xblock.fragment import Fragment
+from xblock.fields import Boolean, Dict, Float, Integer, Scope, String
 from xblock.validation import ValidationMessage
 from xblockutils.resources import ResourceLoader
 from xblockutils.studio_editable import StudioEditableXBlockMixin
@@ -22,7 +21,6 @@ except ImportError:
 
 from .grader import Grader
 from .utils import get_doc_link
-
 
 loader = ResourceLoader(__name__)  # pylint: disable=invalid-name
 
@@ -275,7 +273,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         """
         width_scale = self.width / float(self.height)
         box_size = self.bounding_box_size
-        bounding_box = [-box_size*width_scale, box_size, box_size*width_scale, -box_size]
+        bounding_box = [-box_size * width_scale, box_size, box_size * width_scale, -box_size]
         return {
             'width': self.width,
             'height': self.height,
@@ -315,7 +313,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
             'description': self.background_description,
         }
 
-    def _get_default_vector(self):  # pylint: disable=no-self-use
+    def _get_default_vector(self):
         """
         Return dictionary that represents vector with default values filled in.
         """
@@ -352,7 +350,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
             vectors.append(default_vector)
         return vectors
 
-    def _get_default_point(self):  # pylint: disable=no-self-use
+    def _get_default_point(self):
         """
         Return dictionary that represents point with default values filled in.
         """
@@ -495,7 +493,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
                     "that would allow anyone to solve the problem if the image did not load."
                 )
 
-    def _validate_check_answer_data(self, data):  # pylint: disable=no-self-use
+    def _validate_check_answer_data(self, data):
         """
         Validate answer data submitted by user.
         """
@@ -539,10 +537,7 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         except ValueError as error:
             raise JsonHandlerError(400, "Invalid data") from error
         # Save answer
-        self.answer = dict(
-            vectors=data["vectors"],
-            points=data["points"]
-        )
+        self.answer = {'vectors': data["vectors"], 'points': data["points"]}
         # Compute result
         grader = Grader()
         result = grader.grade(data)
@@ -550,10 +545,8 @@ class VectorDrawXBlock(StudioEditableXBlockMixin, XBlock):
         self.result = result
         # Publish grade data
         score = 1 if result["correct"] else 0
-        self.runtime.publish(self, 'grade', dict(value=score, max_value=1))
-        return {
-            "result": result,
-        }
+        self.runtime.publish(self, 'grade', {"value": score, "max_value": 1})
+        return {"result": result}
 
     @staticmethod
     def workbench_scenarios():
