@@ -1,4 +1,4 @@
-# Vectordraw XBlock
+# DEPRECATED: Vectordraw XBlock
 
 ![Travis CI](https://travis-ci.org/open-craft/xblock-vectordraw.svg?branch=master)
 
